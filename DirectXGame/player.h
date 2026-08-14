@@ -19,7 +19,6 @@ private:
 	// 速度
 	KamataEngine::Vector2 velocity_ = {0, 0};
 
-	
 	//playerのスプライト
 	KamataEngine::Sprite* sprite_ = nullptr;
 	// playerのテクスチャ
