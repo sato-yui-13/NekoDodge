@@ -6,10 +6,19 @@ public:
 	~Enemy();
 
 	void Initialize();
+	//移動の処理
+	void Move();
 	void Update();
 	void Draw();
 
 private:
+
+
+	//当たり判定用の変数
+	Vector2 bulletSize_ = {64.0f, 64.0f};
+
+
+
 	//攻撃
 	KamataEngine::Vector2 bulletPosition = {0.0f, 0.0f};
 	//時間で弾出る
@@ -17,18 +26,20 @@ private:
 	//時間のflag
 	bool isTimer_ = false;
 	//speed
-	float enemySpeed_ = 1.0f;
-
+	
+	float bulletSpeed_ = 1.0f;
 	// enemyのスプライト
 	KamataEngine::Sprite* spriteBullet_ = nullptr;
 	// enemyのテクスチャ
 	uint32_t bulletHd = 0;
 
-
-
-
 	//敵の位置
-	KamataEngine::Vector2 enemyPosition = {100.0f, 400.0f};
+	KamataEngine::Vector2 enemyPosition = {1380.0f, 100.0f};
+	// 敵を止めたい位置
+	KamataEngine::Vector2 targetEnemy_ = {800.0f, 100.0f};
+	//スピード
+	float enemySpeed_ = 1.0f;
+	
 	// 画像
 	// enemyのスプライト
 	KamataEngine::Sprite* sprite_ = nullptr;

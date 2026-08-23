@@ -13,6 +13,8 @@ public:
 
 private:
 
+	//当たり判定用の数字
+	Vector2 playerSize_ = {64.0f, 64.0f};
 	// 位置
 	KamataEngine::Vector2 position_ = {0, 0};
 

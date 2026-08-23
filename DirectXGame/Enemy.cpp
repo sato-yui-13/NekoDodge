@@ -16,8 +16,23 @@ void Enemy::Initialize() {
 
 }
 
-void Enemy::Update() {
+void Enemy::Move() {
 
+	if (enemyPosition.x > targetEnemy_.x) {
+		enemyPosition.x -= enemySpeed_;
+	}
+
+	// 目標地点を通り過ぎないようにする
+	if (enemyPosition.x < targetEnemy_.x) {
+		enemyPosition.x = targetEnemy_.x;
+	}
+
+	sprite_->SetPosition(enemyPosition);
+
+}
+
+void Enemy::Update() {
+	Move();
 	enemyTimer_ += 1.0f / 60.0f;
 
 	// 3秒経ったら弾を発射
@@ -30,7 +45,7 @@ void Enemy::Update() {
 
 	// 弾を左に移動
 	if (isTimer_) {
-		bulletPosition.x -= enemySpeed_;
+		bulletPosition.x -= bulletSpeed_;
 
 		// 画面左端まで行ったら消す
 		if (bulletPosition.x < 0.0f) {

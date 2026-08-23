@@ -25,6 +25,6 @@ void GameScene::Update() {
 void GameScene::Draw() {
 
 	player_->Draw();
-	//enemy_->Draw();
-	trackingEnemy_->Draw();
+	enemy_->Draw();
+	//trackingEnemy_->Draw();
 }
