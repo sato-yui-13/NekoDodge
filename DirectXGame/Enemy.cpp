@@ -16,6 +16,10 @@ void Enemy::Initialize() {
 
 }
 
+KamataEngine::Vector2 Enemy::GetPosition() { return bulletPosition; }
+
+KamataEngine::Vector2 Enemy::GetSize() { return size_; }
+
 void Enemy::Move() {
 
 	if (enemyPosition.x > targetEnemy_.x) {
@@ -31,17 +35,18 @@ void Enemy::Move() {
 
 }
 
-void Enemy::Update() {
-	Move();
+void Enemy::Bullet() {
 	enemyTimer_ += 1.0f / 60.0f;
 
 	// 3秒経ったら弾を発射
 	if (enemyTimer_ >= 10.0f && !isTimer_) {
 		bulletPosition = enemyPosition;
-		
+
 		isTimer_ = true;
 
-	} 
+		// 次の攻撃を複数弾にする
+		isSecondAttack_ = true;
+	}
 
 	// 弾を左に移動
 	if (isTimer_) {
@@ -54,6 +59,17 @@ void Enemy::Update() {
 			enemyTimer_ = 0.0f;
 		}
 	}
+}
+
+void Enemy::Second() {
+
+}
+
+
+void Enemy::Update() {
+	Move();
+	Bullet();
+	Second();
 }
 
 void Enemy::Draw() {

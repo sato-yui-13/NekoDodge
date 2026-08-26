@@ -14,24 +14,32 @@ void player::Initialize() {
 	sprite_->SetPosition(position_);
 }
 
+KamataEngine::Vector2 player::GetPosition() { return position_; }
+
+KamataEngine::Vector2 player::GetSize() { return size_; }
+
+bool player::IsDead() { return isDead_; }
+void player::SetDead() { 
+	isDead_ = true; 
+}
 void player::Update() {
 
 	velocity_.x = 0.0f;
 	velocity_.y = 0.0f;
 	if (Input::GetInstance()->PushKey(DIK_D)) {
-		velocity_.x = 1.0f;
+		velocity_.x = speed_;
 	}
 
 	if (Input::GetInstance()->PushKey(DIK_A)) {
-		velocity_.x = -1.0f;
+		velocity_.x = -speed_;
 	}
 
 	if (Input::GetInstance()->PushKey(DIK_W)) {
-		velocity_.y = -1.0f;
+		velocity_.y = -speed_;
 	}
 
 	if (Input::GetInstance()->PushKey(DIK_S)) {
-		velocity_.y = 1.0f;
+		velocity_.y = speed_;
 	}
 
 	// 位置を更新
@@ -40,14 +48,15 @@ void player::Update() {
 
 	// スプライトに反映
 	sprite_->SetPosition(position_);
-
 }
 
 void player::Draw() {
 
 	Sprite::PreDraw();
-	// 描画
-	sprite_->Draw();
+	if (!isDead_) {
+		// 描画
+		sprite_->Draw();
+	}
 
 	Sprite::PostDraw();
 }
