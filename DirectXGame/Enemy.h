@@ -19,6 +19,10 @@ public:
 	//二回目の弾
 	void Second();
 
+	//三回目の弾(扇型)
+	void Third();
+
+
 	//位置
 	KamataEngine::Vector2 GetPosition();
 	// 当たり判定
@@ -36,8 +40,11 @@ private:
 	//時間のflag
 	bool isTimer_ = false;
 	//speed
-	
 	float bulletSpeed_ = 5.0f;
+	// 弾の速度（3発分）
+	KamataEngine::Vector2 bulletVelocity[3];
+
+
 
 	// enemyのスプライト
 	KamataEngine::Sprite* spriteBullet[3] = {};
@@ -54,11 +61,12 @@ private:
 	//============== 二個目の段階 ==============//
 	// 攻撃段階
 	bool isFirstAttack_ = true;
+	//二回目の攻撃flag
 	bool isSecondAttack_ = false;
+	//描画フラグ
 	bool isBulletActive_ = false;
-	// 速度
-	//KamataEngine::Vector2 bulletVelocity[3];
-
+	//三回目のフラグ
+	bool isThirdAttack_ = false;
 
 
 

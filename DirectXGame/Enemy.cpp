@@ -66,6 +66,7 @@ void Enemy::Bullet() {
 
 void Enemy::Second() {
 	enemyTimer_ += 1.0f / 60.0f;
+
 	if (isSecondAttack_) {
 
 		if (enemyTimer_ >= 5.0f && isSecondAttack_ && !isTimer_) {
@@ -77,7 +78,7 @@ void Enemy::Second() {
 
 			bulletPosition[2] = {enemyPosition.x + 50.0f, enemyPosition.y};
 
-			//isSecondAttack_ = false;
+			// isSecondAttack_ = false;
 
 			isTimer_ = true;
 
@@ -98,7 +99,49 @@ void Enemy::Second() {
 				isTimer_ = false;
 				isSecondAttack_ = false; // ←描画停止
 
-				isFirstAttack_ = false;
+				// 三回個目のflag
+				isThirdAttack_ = true;
+
+				enemyTimer_ = 0.0f;
+			}
+		}
+	}
+}
+
+void Enemy::Third() {
+	enemyTimer_ += 1.0f / 60.0f;
+
+	// 扇状弾の生成は1回だけ
+	if (isThirdAttack_) {
+		if (enemyTimer_ >= 5.0f && isThirdAttack_ && !isTimer_) {
+
+			bulletPosition[0] = {enemyPosition.x - 100.0f, enemyPosition.y};
+			bulletPosition[1] = {enemyPosition.x, enemyPosition.y};
+			bulletPosition[2] = {enemyPosition.x + 100.0f, enemyPosition.y};
+
+			bulletVelocity[0] = {-3.0f, 5.0f};
+			bulletVelocity[1] = {0.0f, 5.0f};
+			bulletVelocity[2] = {3.0f, 5.0f};
+
+			isThirdAttack_ = false;
+
+			isTimer_ = true;
+			isBulletActive_ = true;
+		}
+	}
+
+	// 移動
+	if (isTimer_) {
+
+		for (int i = 0; i < 3; i++) {
+
+			 bulletPosition[i].x += bulletVelocity[i].x;
+			bulletPosition[i].y += bulletVelocity[i].y;
+
+			if (bulletPosition[i].y > 720.0f) {
+
+				isTimer_ = false;
+				isThirdAttack_ = false; // ←描画停止
 
 				enemyTimer_ = 0.0f;
 			}
@@ -113,25 +156,25 @@ void Enemy::Update() {
 	if (isSecondAttack_) {
 		Second();
 	}
+	
+		Third();
+	
 }
-
 void Enemy::Draw() {
-
 	Sprite::PreDraw();
-	// 敵表示確認
 
 	if (isBulletActive_) {
 
+		// 単発
 		if (isFirstAttack_) {
-
-			// 単発
 
 			spriteBullet[0]->SetPosition(bulletPosition[0]);
 			spriteBullet[0]->Draw();
 
-		} else {
+		}
+		// 3発系
+		else {
 
-			// 3方向
 			for (int i = 0; i < 3; i++) {
 
 				spriteBullet[i]->SetPosition(bulletPosition[i]);
@@ -139,7 +182,9 @@ void Enemy::Draw() {
 			}
 		}
 	}
+
 	// 敵
 	sprite_->Draw();
+
 	Sprite::PostDraw();
 }
