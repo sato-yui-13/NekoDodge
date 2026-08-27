@@ -30,30 +30,34 @@ private:
 	KamataEngine::Vector2 size_ = {4.0f, 4.0f};
 	
 	//攻撃
-	KamataEngine::Vector2 bulletPosition = {1000.0f, 0.0f};
+	KamataEngine::Vector2 bulletPosition[3];
 	//時間で弾出る
 	float enemyTimer_ = 0.0f;
 	//時間のflag
 	bool isTimer_ = false;
 	//speed
 	
-	float bulletSpeed_ = 1.0f;
+	float bulletSpeed_ = 5.0f;
+
 	// enemyのスプライト
-	KamataEngine::Sprite* spriteBullet_ = nullptr;
+	KamataEngine::Sprite* spriteBullet[3] = {};
 	// enemyのテクスチャ
 	uint32_t bulletHd = 0;
 
 	//敵の位置
 	KamataEngine::Vector2 enemyPosition = {1380.0f, 100.0f};
 	// 敵を止めたい位置
-	KamataEngine::Vector2 targetEnemy_ = {800.0f, 100.0f};
+	KamataEngine::Vector2 targetEnemy_ = {630.0f, 100.0f};
 	//スピード
-	float enemySpeed_ = 1.0f;
+	float enemySpeed_ = 6.0f;
 	
-
 	//============== 二個目の段階 ==============//
 	// 攻撃段階
+	bool isFirstAttack_ = true;
 	bool isSecondAttack_ = false;
+	bool isBulletActive_ = false;
+	// 速度
+	//KamataEngine::Vector2 bulletVelocity[3];
 
 
 

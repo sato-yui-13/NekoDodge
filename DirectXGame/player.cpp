@@ -10,7 +10,6 @@ void player::Initialize() {
 
 	sprite_ = Sprite::Create(playerHd, {0, 0});
 
-	position_ = {40.0f, 60.0f};
 	sprite_->SetPosition(position_);
 }
 

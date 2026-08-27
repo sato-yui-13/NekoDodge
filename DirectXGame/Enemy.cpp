@@ -11,12 +11,12 @@ void Enemy::Initialize() {
 	sprite_ = Sprite::Create(enemyHd, enemyPosition);
 
 	bulletHd = TextureManager::Load("enemy/bullet.png");
-	spriteBullet_ = Sprite::Create(bulletHd, bulletPosition);
-
-
+	for (int i = 0; i < 3; i++) {
+		spriteBullet[i] = Sprite::Create(bulletHd, bulletPosition[i]);
+	}
 }
 
-KamataEngine::Vector2 Enemy::GetPosition() { return bulletPosition; }
+KamataEngine::Vector2 Enemy::GetPosition() { return bulletPosition[0]; }
 
 KamataEngine::Vector2 Enemy::GetSize() { return size_; }
 
@@ -32,54 +32,114 @@ void Enemy::Move() {
 	}
 
 	sprite_->SetPosition(enemyPosition);
-
 }
 
 void Enemy::Bullet() {
 	enemyTimer_ += 1.0f / 60.0f;
 
-	// 3秒経ったら弾を発射
-	if (enemyTimer_ >= 10.0f && !isTimer_) {
-		bulletPosition = enemyPosition;
+	// 最初の単発攻撃
+	if (enemyTimer_ >= 5.0f && isFirstAttack_ && !isTimer_) {
+
+		bulletPosition[0] = enemyPosition;
 
 		isTimer_ = true;
-
-		// 次の攻撃を複数弾にする
-		isSecondAttack_ = true;
+		isBulletActive_ = true;
 	}
 
-	// 弾を左に移動
-	if (isTimer_) {
-		bulletPosition.x -= bulletSpeed_;
+	// 単発弾移動
+	if (isTimer_ && isFirstAttack_) {
 
-		// 画面左端まで行ったら消す
-		if (bulletPosition.x < 0.0f) {
+		bulletPosition[0].y += bulletSpeed_;
+
+		if (bulletPosition[0].y > 720.0f) {
+
 			isTimer_ = false;
-			// ここで10秒待つ
+			isBulletActive_ = false; // ←描画停止
+
+			isFirstAttack_ = false;
+			isSecondAttack_ = true;
+
 			enemyTimer_ = 0.0f;
 		}
 	}
 }
 
 void Enemy::Second() {
+	enemyTimer_ += 1.0f / 60.0f;
+	if (isSecondAttack_) {
 
+		if (enemyTimer_ >= 5.0f && isSecondAttack_ && !isTimer_) {
+
+			// 初期位置
+			bulletPosition[0] = enemyPosition;
+
+			bulletPosition[1] = {enemyPosition.x - 50.0f, enemyPosition.y};
+
+			bulletPosition[2] = {enemyPosition.x + 50.0f, enemyPosition.y};
+
+			//isSecondAttack_ = false;
+
+			isTimer_ = true;
+
+			isBulletActive_ = true; // ←追加
+		}
+	}
+
+	// 3方向弾移動
+	if (isTimer_) {
+
+		for (int i = 0; i < 3; i++) {
+
+			// bulletPosition[i].x += bulletVelocity[i].x;
+			bulletPosition[i].y += enemySpeed_;
+
+			if (bulletPosition[i].y > 720.0f) {
+
+				isTimer_ = false;
+				isSecondAttack_ = false; // ←描画停止
+
+				isFirstAttack_ = false;
+
+				enemyTimer_ = 0.0f;
+			}
+		}
+	}
 }
-
 
 void Enemy::Update() {
 	Move();
 	Bullet();
-	Second();
+
+	if (isSecondAttack_) {
+		Second();
+	}
 }
 
 void Enemy::Draw() {
 
 	Sprite::PreDraw();
-	// 描画
-	if (isTimer_) {
-		spriteBullet_->SetPosition(bulletPosition);
-		spriteBullet_->Draw();
+	// 敵表示確認
+
+	if (isBulletActive_) {
+
+		if (isFirstAttack_) {
+
+			// 単発
+
+			spriteBullet[0]->SetPosition(bulletPosition[0]);
+			spriteBullet[0]->Draw();
+
+		} else {
+
+			// 3方向
+			for (int i = 0; i < 3; i++) {
+
+				spriteBullet[i]->SetPosition(bulletPosition[i]);
+				spriteBullet[i]->Draw();
+			}
+		}
 	}
+	// 敵
 	sprite_->Draw();
 	Sprite::PostDraw();
 }

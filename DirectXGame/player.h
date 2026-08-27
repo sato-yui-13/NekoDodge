@@ -27,7 +27,7 @@ private:
 	bool isDead_ = false;
 
 	// 位置
-	KamataEngine::Vector2 position_ = {0, 0};
+	KamataEngine::Vector2 position_ = {630, 450};
 	// 速度
 	KamataEngine::Vector2 velocity_ = {0, 0};
 	//
