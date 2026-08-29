@@ -17,6 +17,7 @@ public:
 	//enemyの当たり判定
 	void CheckCollisionEnemy();
 
+	player* GetPlayer() { return player_; }
 
 	/// 更新
 	void Update();

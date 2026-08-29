@@ -17,10 +17,8 @@ KamataEngine::Vector2 player::GetPosition() { return position_; }
 
 KamataEngine::Vector2 player::GetSize() { return size_; }
 
-bool player::IsDead() { return isDead_; }
-void player::SetDead() { 
-	isDead_ = true; 
-}
+
+
 void player::Update() {
 
 	velocity_.x = 0.0f;

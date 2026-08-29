@@ -16,8 +16,14 @@ public:
 	//当たり判定
 	KamataEngine::Vector2 GetSize();
 	
-	void SetDead();
-	bool IsDead();
+	
+	
+
+		// 死亡フラグ
+	bool IsDead() const { return isDead_; }
+
+	// 死亡させる
+	void SetDead() { isDead_ = true; }
 
 private:
 

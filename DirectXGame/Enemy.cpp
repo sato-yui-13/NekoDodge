@@ -149,6 +149,52 @@ void Enemy::Third() {
 	}
 }
 
+void Enemy::Fourth() {
+	if (!isSplitActive_) {
+
+		// 最初の1発
+		bulletPosition[0] = enemyPosition;
+
+		bulletVelocity[0] = {0.0f, 5.0f};
+
+		isSplitActive_ = true;
+		isTimer_ = true;
+	}
+
+	// 親弾移動
+	if (isTimer_) {
+
+		bulletPosition[0].x += bulletVelocity[0].x;
+		bulletPosition[0].y += bulletVelocity[0].y;
+
+		splitTimer_ += 1.0f / 60.0f;
+
+		// 2秒後に分裂
+		if (splitTimer_ >= 2.0f) {
+
+			// 左右に分裂
+			bulletPosition[1] = bulletPosition[0];
+			bulletPosition[2] = bulletPosition[0];
+
+			bulletVelocity[1] = {-3.0f, 5.0f};
+			bulletVelocity[2] = {3.0f, 5.0f};
+
+			isSplit_ = true;
+		}
+	}
+
+	// 分裂後
+	if (isSplit_) {
+
+		for (int i = 1; i < 3; i++) {
+
+			bulletPosition[i].x += bulletVelocity[i].x;
+			bulletPosition[i].y += bulletVelocity[i].y;
+		}
+	}
+
+}
+
 void Enemy::Update() {
 	Move();
 	Bullet();

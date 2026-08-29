@@ -22,6 +22,9 @@ public:
 	//三回目の弾(扇型)
 	void Third();
 
+	//四回目の弾(分裂)
+	void Fourth();
+
 
 	//位置
 	KamataEngine::Vector2 GetPosition();
@@ -57,8 +60,18 @@ private:
 	KamataEngine::Vector2 targetEnemy_ = {630.0f, 100.0f};
 	//スピード
 	float enemySpeed_ = 6.0f;
+
+	//四回目の宣言
+	//開始のflag
+	bool isSplitActive_ = false;
+	//分裂のタイマー
+	float splitTimer_ = 0.0f;
+	//分裂できたかどうかのフラグ
+	bool isSplit_ = false;
 	
-	//============== 二個目の段階 ==============//
+
+
+	//============== 二個目移行のフラグ ==============//
 	// 攻撃段階
 	bool isFirstAttack_ = true;
 	//二回目の攻撃flag
@@ -67,7 +80,8 @@ private:
 	bool isBulletActive_ = false;
 	//三回目のフラグ
 	bool isThirdAttack_ = false;
-
+	// 4回目：分裂弾
+	bool isFourthAttack_ = false;
 
 
 

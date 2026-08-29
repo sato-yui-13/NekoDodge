@@ -8,7 +8,7 @@ GameScene* gameScene = nullptr;
 // シーン用ポインタ
 TitleScene* titleScene = nullptr;
 // シーン
-enum class Scene { kTitle, kGame };
+enum class Scene { kTitle, kGame, kOver };
 
 // 現在のシーン
 Scene scene = Scene::kTitle;
@@ -44,6 +44,11 @@ void ChangeScene() {
 		gameScene->Initialize();
 
 		break;
+	case Scene::kOver:
+
+		gameScene->Draw();
+
+		break;
 	}
 
 	oldScene = scene;
@@ -68,6 +73,14 @@ void SceneUpdate() {
 	case Scene::kGame:
 		gameScene->Update();
 
+		if (gameScene->GetPlayer()->IsDead()) {
+			scene = Scene::kOver;
+		}
+		break;
+	case Scene::kOver:
+
+		titleScene->Draw();
+
 		break;
 	}
 }
@@ -82,6 +95,11 @@ void SceneDraw() {
 		break;
 
 	case Scene::kGame:
+
+		gameScene->Draw();
+
+		break;
+	case Scene::kOver:
 
 		gameScene->Draw();
 
