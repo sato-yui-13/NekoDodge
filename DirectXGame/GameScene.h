@@ -2,8 +2,10 @@
 #include "Collision.h"
 #include "Enemy.h"
 #include "KamataEngine.h"
-#include "TrackingEnemy.h"
+
 #include "player.h"
+
+#include <vector>
 
 // ゲームシーン
 class GameScene {
@@ -27,9 +29,10 @@ public:
 
 private:
 	player* player_;
-	Enemy* enemy_;
-	TrackingEnemy* trackingEnemy_;
-	//Collision* collision_;
+	//Enemy* enemy_;
+	
+	
+	std::vector<Enemy*> enemies_;
 
 	// カメラ
 	KamataEngine::Camera camera_;

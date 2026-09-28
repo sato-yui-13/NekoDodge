@@ -42,7 +42,7 @@ namespace KamataEngine {
 /// エンジンの初期化
 /// </summary>
 /// <param name="title">ウィンドウタイトル</param>
-void Initialize(const std::wstring& title = L"LE2X_99_カマタ_タロウ", bool enableDebugLayer = false);
+void Initialize(const std::wstring& title = L"LE3D_12_サトウ_ユイ_NekoDodge", bool enableDebugLayer = false);
 
 /// <summary>
 /// エンジンの終了処理
