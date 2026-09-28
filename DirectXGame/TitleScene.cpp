@@ -7,7 +7,12 @@ TitleScene::TitleScene() {}
 
 TitleScene::~TitleScene() { delete sprite_; }
 
-void TitleScene::Initialize_2d() {
+void TitleScene::Initialize() {
+	//3Dモデル
+	title_ = new title();
+	//title_->Initialize(, );
+
+
 	// 背景
 	textureHandle_ = TextureManager::Load("Title/Title.png");
 	sprite_ = Sprite::Create(textureHandle_, {0, 0});

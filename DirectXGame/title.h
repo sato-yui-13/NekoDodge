@@ -9,7 +9,7 @@ public:
 	~title();
 
 	// 3Dモデルの初期化
-	void Initialize(Model* model, Camera* camera);
+	void Initialize(Model* titleModel, Model* spaceModel, Camera* camera);
 
 	// 更新
 	void Update();

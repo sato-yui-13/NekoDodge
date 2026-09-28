@@ -1,5 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
+#include "title.h"
 #include <memory>
 #include <vector>
 // ゲームシーン
@@ -10,7 +11,7 @@ public:
 
 	
 	// 2D用の初期化
-	void Initialize_2d();
+	void Initialize();
 
 	// 更新
 	void Update();
@@ -19,11 +20,13 @@ public:
 	void Draw();
 
 private:
-
-
-
 	// 背景
 	KamataEngine::Sprite* sprite_ = nullptr;
 	// 背景
 	uint32_t textureHandle_ = 0;
+
+
+	//3Dモデル
+	title* title_ = nullptr;
+
 };
