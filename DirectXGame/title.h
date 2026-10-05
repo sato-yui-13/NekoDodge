@@ -3,13 +3,13 @@
 #include <memory>
 #include <vector>
 
-class title {
+class Title {
 public:
-	title();
-	~title();
+	Title();
+	~Title();
 
 	// 3Dモデルの初期化
-	void Initialize(Model* titleModel, Model* spaceModel, Camera* camera);
+	void Initialize(KamataEngine::Model* titleModel, KamataEngine::Model* spaceModel, KamataEngine::Model* screenModel, KamataEngine::Camera* camera);
 
 	// 更新
 	void Update();
@@ -19,15 +19,25 @@ public:
 
 private:
 	//titleのモデル
-	KamataEngine::Model* titleModel_ = nullptr;
-	// titleの今位置
-	WorldTransform titleWt_;
+	KamataEngine::Model* titleModel_;
+	// spaceのモデル
+	KamataEngine::Model* spaceModel_;
+	// screenのモデル
+	KamataEngine::Model* screenModel_;
 
-	//spaceのモデル
-	KamataEngine::Model* spaceModel_ = nullptr;
 	// titleの今位置
-	WorldTransform spaceWt_;
+	KamataEngine::WorldTransform titleWt_;
+	// titleの今位置
+	KamataEngine::WorldTransform spaceWt_;
+	// titleの今位置
+	KamataEngine::WorldTransform screenWt_;
 
 	// カメラ
-	Camera* camera_ = nullptr;
+	KamataEngine::Camera* camera_ = nullptr;
+
+	//文字動かす
+	//タイマー
+	float time_ = 0.0f;
+	float wave=0.0f;
+	float alpha = 0.0f;
 };

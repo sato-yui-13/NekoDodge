@@ -16,6 +16,9 @@ void GameScene::Initialize() {
 	player_ = new player();
 	player_->Initialize();
 
+
+
+
 	std::random_device rd;
 	std::mt19937 gen(rd());
 

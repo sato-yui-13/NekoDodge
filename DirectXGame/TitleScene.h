@@ -1,17 +1,15 @@
 #pragma once
 #include "KamataEngine.h"
 #include "title.h"
-#include <memory>
-#include <vector>
+
 // ゲームシーン
 class TitleScene {
 public:
 	TitleScene();
 	~TitleScene();
-
 	
 	// 2D用の初期化
-	void Initialize();
+	void Initialize(KamataEngine::Camera* camera);
 
 	// 更新
 	void Update();
@@ -20,13 +18,20 @@ public:
 	void Draw();
 
 private:
-	// 背景
-	KamataEngine::Sprite* sprite_ = nullptr;
-	// 背景
-	uint32_t textureHandle_ = 0;
-
 
 	//3Dモデル
-	title* title_ = nullptr;
+	Title* title_ = nullptr;
 
+	//タイトル
+	KamataEngine::Model* titleModel_;
+
+	//スペース
+	KamataEngine::Model* spaceModel_;
+
+	// screenのモデル
+	KamataEngine::Model* screenModel_;
+
+
+	////  カメラ
+	KamataEngine::Camera* camera_ = nullptr;
 };

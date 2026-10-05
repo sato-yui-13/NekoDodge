@@ -10,6 +10,9 @@ GameScene* gameScene = nullptr;
 GameOver* gameOver = nullptr;
 
 GameClear* gameClear = nullptr;
+
+Camera camera_;
+
 // BGM
 uint32_t BGMHandle = 0;
 uint32_t voiceHandle = 0;
@@ -37,9 +40,8 @@ void ChangeScene() {
 		delete gameOver;
 		gameOver = nullptr;
 
-		
 		titleScene = new TitleScene();
-		//titleScene->Initialize();
+		titleScene->Initialize(&camera_);
 
 		break;
 
@@ -77,17 +79,12 @@ void ChangeScene() {
 // 更新
 void SceneUpdate() {
 
-	
 	gameTimer += 1.0f / 60.0f;
 	switch (scene) {
 		
-		
-
-	case Scene::kTitle:
-		
-
+	case Scene::kTitle:	
 		 titleScene->Update();
-
+		OutputDebugStringA("TITLE UPDATE\n");
 		// エンターキーを押したらゲームへ
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			scene = Scene::kGame;
@@ -140,15 +137,16 @@ void SceneUpdate() {
 
 // 描画
 void SceneDraw() {
-
+	
 	switch (scene) {
 
 	case Scene::kTitle:
+		OutputDebugStringA("TITLE DRAW\n");
 		 titleScene->Draw();
 		break;
 
 	case Scene::kGame:
-
+		
 		gameScene->Draw();
 
 		break;
@@ -174,7 +172,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	BGMHandle = Audio::GetInstance()->LoadWave("bgm/Shimmering.mp3");
 	voiceHandle = Audio::GetInstance()->PlayWave(BGMHandle, true, 0.2f);
 
-	
+	camera_.Initialize();
+	camera_.translation_ = {0, 0, -20};
+	camera_.rotation_.x = 0.2f;
+	camera_.UpdateMatrix();
+
 	
 	// メインループ
 	while (true) {
