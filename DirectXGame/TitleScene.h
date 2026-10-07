@@ -17,6 +17,11 @@ public:
 	// 描画
 	void Draw();
 
+
+
+	// 画面切り替え
+	bool isStart() const { return isStart; }
+
 private:
 	
 	//  カメラ
@@ -35,7 +40,8 @@ private:
 
 	KamataEngine::Model* flourModel_[10];
 
-
+		// 死亡フラグ
+	bool isStart = false;
 
 	
 };

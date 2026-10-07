@@ -17,8 +17,8 @@ public:
 
 private:
 	// 背景
-	KamataEngine::Sprite* sprite_ = nullptr;
+	//KamataEngine::Sprite* sprite_ = nullptr;
 
 	// 背景
-	uint32_t textureHandle_ = 0;
+	//uint32_t textureHandle_ = 0;
 };

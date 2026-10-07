@@ -14,8 +14,8 @@ GameClear* gameClear = nullptr;
 Camera camera_;
 
 // BGM
-uint32_t BGMHandle = 0;
-uint32_t voiceHandle = 0;
+//uint32_t BGMHandle = 0;
+//uint32_t voiceHandle = 0;
 // シーン用ポインタ
 TitleScene* titleScene = nullptr;
 // シーン
@@ -39,6 +39,11 @@ void ChangeScene() {
 	case Scene::kTitle:
 		delete gameOver;
 		gameOver = nullptr;
+		// カメラを初期位置に戻す
+		camera_.Initialize();
+		camera_.translation_ = {0, 0, -20};
+		camera_.rotation_.x = 0.2f;
+		camera_.UpdateMatrix();
 
 		titleScene = new TitleScene();
 		titleScene->Initialize(&camera_);
@@ -83,20 +88,33 @@ void SceneUpdate() {
 	switch (scene) {
 		
 	case Scene::kTitle:	
+
 		 titleScene->Update();
-		OutputDebugStringA("TITLE UPDATE\n");
+
+		
 		// エンターキーを押したらゲームへ
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-			scene = Scene::kOver;
-			ChangeScene();
+
+			
 		}
+
+		if (titleScene->isStart()) {
+
+			scene = Scene::kGame;
+			ChangeScene();
+			return;
+
+		}
+
 
 		break;
 
 	case Scene::kGame:
+
 		gameScene->Update();
 
 		if (gameScene->GetPlayer()->IsDead()) {
+
 			scene = Scene::kOver;
 			ChangeScene();
 		}
@@ -112,10 +130,11 @@ void SceneUpdate() {
 	case Scene::kOver:
 
 		gameOver->Update();
-		// エンターキーを押したらゲームへ
+		// エンターキーを押したらtitleへ
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			scene = Scene::kTitle;
 			ChangeScene();
+			return;
 		}
 		break;
 
@@ -125,7 +144,7 @@ void SceneUpdate() {
 
 		
 		gameClear->Update();
-		// エンターキーを押したらゲームへ
+		// エンターキーを押したらtitleへ
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			scene = Scene::kTitle;
 			ChangeScene();
@@ -169,8 +188,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	// サウンドデータの読み込み
-	BGMHandle = Audio::GetInstance()->LoadWave("bgm/Shimmering.mp3");
-	voiceHandle = Audio::GetInstance()->PlayWave(BGMHandle, true, 0.2f);
+	//BGMHandle = Audio::GetInstance()->LoadWave("bgm/Shimmering.mp3");
+	//voiceHandle = Audio::GetInstance()->PlayWave(BGMHandle, true, 0.2f);
 
 	camera_.Initialize();
 	camera_.translation_ = {0, 0, -20};
