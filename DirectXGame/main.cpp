@@ -87,7 +87,7 @@ void SceneUpdate() {
 		OutputDebugStringA("TITLE UPDATE\n");
 		// エンターキーを押したらゲームへ
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-			scene = Scene::kGame;
+			scene = Scene::kOver;
 			ChangeScene();
 		}
 

@@ -6,9 +6,9 @@ Title::Title() {}
 Title::~Title() {}
 
 void Title::Initialize(Model* titleModel, Model* spaceModel, Model* screenModel, Camera* camera) {
-	assert(titleModel);
-	assert(spaceModel);
-	assert(camera);
+	//assert(titleModel);
+//	assert(spaceModel);
+	//assert(camera);
 
 	// title
 	titleModel_ = titleModel;

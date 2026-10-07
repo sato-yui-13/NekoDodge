@@ -1,7 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "title.h"
-
+#include "BackScreen.h"
 // ゲームシーン
 class TitleScene {
 public:
@@ -18,20 +18,24 @@ public:
 	void Draw();
 
 private:
+	
+	//  カメラ
+	KamataEngine::Camera* camera_ = nullptr;
 
-	//3Dモデル
+	//文字と背景
 	Title* title_ = nullptr;
-
-	//タイトル
+	
 	KamataEngine::Model* titleModel_;
-
-	//スペース
 	KamataEngine::Model* spaceModel_;
-
-	// screenのモデル
 	KamataEngine::Model* screenModel_;
 
 
-	////  カメラ
-	KamataEngine::Camera* camera_ = nullptr;
+	//背景の動き
+	BackScreen* backScreen_ = nullptr;
+
+	KamataEngine::Model* flourModel_[10];
+
+
+
+	
 };
