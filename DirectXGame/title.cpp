@@ -47,10 +47,13 @@ void Title::Update() {
 }
 
 void Title::Draw() {
-	// 背景
-	screenModel_->Draw(screenWt_, *camera_);
+
 	// たいとる
 	titleModel_->Draw(titleWt_, *camera_);
 	// すぺーす
 	spaceModel_->Draw(spaceWt_, *camera_);
+}
+
+void Title::Background() { // 背景
+	screenModel_->Draw(screenWt_, *camera_);
 }

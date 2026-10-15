@@ -13,6 +13,8 @@ GameScene::~GameScene() {
 }
 
 void GameScene::Initialize() {
+	titleModel_ = Model::CreateFromOBJ("title", true);
+
 	player_ = new player();
 	player_->Initialize();
 
@@ -45,9 +47,9 @@ void GameScene::Initialize() {
 	}
 	// 背景
 	//   背景
-	ScreenHd = TextureManager::Load("Title/screen.png");
+	//ScreenHd = TextureManager::Load("Title/screen.png");
 
-	sprite_ = Sprite::Create(ScreenHd, {0, 0});
+	//sprite_ = Sprite::Create(ScreenHd, {0, 0});
 }
 
 void GameScene::CheckCollisionEnemy() {
@@ -75,17 +77,26 @@ void GameScene::Update() {
 		enemy->Update();
 	}
 
+
+
+
 	CheckCollisionEnemy();
 }
 
 void GameScene::Draw() {
 
 	Sprite::PreDraw();
-	sprite_->Draw();
+	//sprite_->Draw();
 	Sprite::PostDraw();
 
 	player_->Draw();
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
+
+	// 3Dタイトル
+	Model::PreDraw();
+	// 背景
+	title_->Background();
+	Model::PostDraw();
 }

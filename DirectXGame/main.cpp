@@ -1,8 +1,8 @@
+#include "GameClear.h"
+#include "GameOver.h"
 #include "GameScene.h"
 #include "KamataEngine.h"
 #include "TitleScene.h"
-#include "GameOver.h"
-#include "GameClear.h"
 #include <Windows.h>
 
 using namespace KamataEngine;
@@ -14,8 +14,8 @@ GameClear* gameClear = nullptr;
 Camera camera_;
 
 // BGM
-//uint32_t BGMHandle = 0;
-//uint32_t voiceHandle = 0;
+// uint32_t BGMHandle = 0;
+// uint32_t voiceHandle = 0;
 // シーン用ポインタ
 TitleScene* titleScene = nullptr;
 // シーン
@@ -72,7 +72,6 @@ void ChangeScene() {
 		delete gameScene;
 		gameScene = nullptr;
 
-
 		gameClear = new GameClear();
 		gameClear->Initialize();
 		break;
@@ -86,26 +85,16 @@ void SceneUpdate() {
 
 	gameTimer += 1.0f / 60.0f;
 	switch (scene) {
-		
-	case Scene::kTitle:	
 
-		 titleScene->Update();
+	case Scene::kTitle:
 
-		
-		// エンターキーを押したらゲームへ
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-
-			
-		}
-
-		if (titleScene->isStart()) {
-
+		titleScene->Update();
+		//アニメーション終わり次第ゲームシーンへ
+		if (titleScene->IsAnimEnd()) {
 			scene = Scene::kGame;
 			ChangeScene();
 			return;
-
 		}
-
 
 		break;
 
@@ -124,7 +113,6 @@ void SceneUpdate() {
 			ChangeScene();
 		}
 
-
 		break;
 
 	case Scene::kOver:
@@ -138,11 +126,8 @@ void SceneUpdate() {
 		}
 		break;
 
-
-
 	case Scene::kClear:
 
-		
 		gameClear->Update();
 		// エンターキーを押したらtitleへ
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
@@ -156,16 +141,16 @@ void SceneUpdate() {
 
 // 描画
 void SceneDraw() {
-	
+
 	switch (scene) {
 
 	case Scene::kTitle:
 		OutputDebugStringA("TITLE DRAW\n");
-		 titleScene->Draw();
+		titleScene->Draw();
 		break;
 
 	case Scene::kGame:
-		
+
 		gameScene->Draw();
 
 		break;
@@ -188,15 +173,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	// サウンドデータの読み込み
-	//BGMHandle = Audio::GetInstance()->LoadWave("bgm/Shimmering.mp3");
-	//voiceHandle = Audio::GetInstance()->PlayWave(BGMHandle, true, 0.2f);
+	// BGMHandle = Audio::GetInstance()->LoadWave("bgm/Shimmering.mp3");
+	// voiceHandle = Audio::GetInstance()->PlayWave(BGMHandle, true, 0.2f);
 
 	camera_.Initialize();
 	camera_.translation_ = {0, 0, -20};
 	camera_.rotation_.x = 0.2f;
 	camera_.UpdateMatrix();
 
-	
 	// メインループ
 	while (true) {
 		// エンジンの更新
@@ -208,11 +192,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		ChangeScene();
 		SceneUpdate();
 
-		
 		dxCommon->PreDraw();
 		SceneDraw();
 		dxCommon->PostDraw();
-	
 	}
 
 	// ゲームシーンの解放

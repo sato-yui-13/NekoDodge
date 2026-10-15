@@ -16,6 +16,7 @@ public:
 
 	// 描画
 	void Draw();
+	void Background();
 
 private:
 	//titleのモデル

@@ -1,6 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "title.h"
+#include "changeScene.h"
 #include "BackScreen.h"
 // ゲームシーン
 class TitleScene {
@@ -8,8 +9,10 @@ public:
 	TitleScene();
 	~TitleScene();
 	
-	// 2D用の初期化
+	// 初期化
 	void Initialize(KamataEngine::Camera* camera);
+
+	
 
 	// 更新
 	void Update();
@@ -17,10 +20,8 @@ public:
 	// 描画
 	void Draw();
 
-
-
-	// 画面切り替え
-	bool isStart() const { return isStart; }
+	// 終わりの判定
+	bool IsAnimEnd() const { return changeScene_->IsAnimEnd(); }
 
 private:
 	
@@ -29,19 +30,25 @@ private:
 
 	//文字と背景
 	Title* title_ = nullptr;
+	// 背景の動き
+	BackScreen* backScreen_ = nullptr;
 	
+	//シーン切り替えアニメーション
+	changeScene* changeScene_ = nullptr;
+
+
+
 	KamataEngine::Model* titleModel_;
 	KamataEngine::Model* spaceModel_;
 	KamataEngine::Model* screenModel_;
 
+	KamataEngine::Model* colorfulModel_[100];
 
-	//背景の動き
-	BackScreen* backScreen_ = nullptr;
+	
 
 	KamataEngine::Model* flourModel_[10];
 
-		// 死亡フラグ
-	bool isStart = false;
+	
 
 	
 };

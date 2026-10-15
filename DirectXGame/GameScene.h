@@ -2,7 +2,7 @@
 #include "Collision.h"
 #include "Enemy.h"
 #include "KamataEngine.h"
-
+#include "title.h"
 #include "player.h"
 
 #include <vector>
@@ -34,13 +34,15 @@ private:
 	
 	std::vector<Enemy*> enemies_;
 
-	// カメラ
-	KamataEngine::Camera camera_;
 
-
+	//  カメラ
+	KamataEngine::Camera* camera_ = nullptr;
+	// 文字と背景
+	Title* title_ = nullptr;
+	KamataEngine::Model* titleModel_;
 	//背景用
 	// playerのスプライト
-	KamataEngine::Sprite* sprite_ = nullptr;
+	//KamataEngine::Sprite* sprite_ = nullptr;
 	// playerのテクスチャ
-	uint32_t ScreenHd = 0;
+	//uint32_t ScreenHd = 0;
 };
