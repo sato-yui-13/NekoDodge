@@ -1,434 +1,319 @@
+
 #include "Enemy.h"
+#include <cassert>
 #include <cmath>
-#include <random>
 
 using namespace KamataEngine;
 
-Enemy::~Enemy() {}
+namespace {
+constexpr float kScreenWidth = 1280.0f;
+constexpr float kScreenHeight = 720.0f;
+constexpr float kDeltaTime = 1.0f / 60.0f;
+constexpr float kSpawnInterval = 0.2f;
+constexpr float kBulletZ = 0.0f;
 
-void Enemy::Initialize(Vector2 position) {
+// 画面座標から3D座標への変換。
+// カメラの投影方式・画角に合わせて調整すること。
+constexpr float kWorldScale = 0.0064f;
 
-	enemyPosition = position;
+Vector3 ScreenToWorld(Vector2 position) { return {(position.x - kScreenWidth * 0.5f) * kWorldScale, (kScreenHeight * 0.5f - position.y) * kWorldScale, kBulletZ}; }
+} // namespace
 
-	// 攻撃を1～5からランダム
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> attackDist(1, 5);
+Enemy::~Enemy() = default;
 
-	attackType_ = attackDist(gen);
+//==================================================
+// 初期化
+//==================================================
 
-	// 画像
-	enemyHd = TextureManager::Load("enemy/enemy.png");
+void Enemy::Initialize(Model* enemyModel, Model* bulletModel, Camera* camera, Vector2 position) {
 
-	sprite_ = Sprite::Create(enemyHd, enemyPosition);
+	assert(enemyModel);
+	assert(bulletModel);
+	assert(camera);
 
-	bulletHd = TextureManager::Load("enemy/bullet.png");
+	enemyModel_ = enemyModel;
+	bulletModel_ = bulletModel;
+	camera_ = camera;
+
+	enemyPosition_ = position;
+	enemyVisible_ = true;
+
+	enemyWt_.Initialize();
 
 	for (int i = 0; i < 8; i++) {
-		spriteBullet[i] = Sprite::Create(bulletHd, bulletPosition[i]);
+		bulletWt_[i].Initialize();
+		bulletWt_[i].scale_ = {0.2f, 0.2f, 0.2f};
+
+		bulletActive_[i] = false;
+		bulletPosition[i] = {-1000.0f, -1000.0f};
+		bulletVelocity[i] = {};
+	}
+
+	std::uniform_int_distribution<int> attackDist(1, 5);
+	attackType_ = attackDist(randomEngine_);
+
+	enemyTimer_ = 0.0f;
+	bulletSpawnTimer_ = 0.0f;
+	enemyMoveTimer_ = 0.0f;
+
+	attackStarted_ = false;
+	isEnemyMoving_ = false;
+	isSplit_ = false;
+
+	SyncTransforms();
+}
+
+//==================================================
+// 画面座標から3Dモデル座標へ反映
+//==================================================
+
+void Enemy::SyncTransforms() {
+
+	enemyWt_.translation_ = ScreenToWorld(enemyPosition_);
+	enemyWt_.UpdateMatrix();
+
+	for (int i = 0; i < 8; i++) {
+		bulletWt_[i].translation_ = ScreenToWorld(bulletPosition[i]);
+		bulletWt_[i].UpdateMatrix();
 	}
 }
 
-// 敵自身の位置を返す
-KamataEngine::Vector2 Enemy::GetBulletPosition(int index) { return bulletPosition[index]; }
+//==================================================
+// 取得
+//==================================================
 
-KamataEngine::Vector2 Enemy::GetSize() { return size_; }
+Vector2 Enemy::GetBulletPosition(int index) {
 
+	if (index < 0 || index >= 8 || !bulletActive_[index]) {
+		return {-1000.0f, -1000.0f};
+	}
+
+	return bulletPosition[index];
+}
+
+Vector2 Enemy::GetSize() { return size_; }
+
+int Enemy::GetBulletCount() {
+
+	int count = 0;
+
+	for (int i = 0; i < 8; i++) {
+		if (bulletActive_[i]) {
+			count++;
+		}
+	}
+
+	return count;
+}
+
+//==================================================
 // 敵の移動
+//==================================================
+
 void Enemy::Move() {
 
 	if (!isEnemyMoving_) {
 		return;
 	}
 
-	enemyMoveTimer_ += 1.0f / 60.0f;
+	enemyMoveTimer_ += kDeltaTime;
 
-	// 0.5秒後に新しい場所へ移動
 	if (enemyMoveTimer_ >= 0.5f) {
-
-		enemyPosition = nextEnemyPosition_;
-
-		sprite_->SetPosition(enemyPosition);
+		enemyPosition_ = nextEnemyPosition_;
 
 		isEnemyMoving_ = false;
-
+		enemyVisible_ = true;
 		enemyMoveTimer_ = 0.0f;
 	}
 }
 
 //==================================================
-// 1回目　単発
+// 次の攻撃の準備
 //==================================================
 
-void Enemy::Bullet() {
+void Enemy::PrepareNextAttack() {
 
-	enemyTimer_ += 2.0f / 60.0f;
+	attackStarted_ = false;
+	enemyTimer_ = 0.0f;
+	bulletSpawnTimer_ = 0.0f;
+	bulletsSpawned_ = 0;
+	bulletsToSpawn_ = 0;
+	isSplit_ = false;
+	splitTimer_ = 0.0f;
 
-	// 単発攻撃開始
-	if (enemyTimer_ >= 2.0f && !isTimer_) {
-
-		bulletPosition[0] = enemyPosition;
-
-		isTimer_ = true;
-		isBulletActive_ = true;
+	for (int i = 0; i < 8; i++) {
+		bulletActive_[i] = false;
+		bulletPosition[i] = {-1000.0f, -1000.0f};
 	}
 
-	// 単発弾移動
-	if (isTimer_) {
+	std::uniform_real_distribution<float> xDist(100.0f, 1180.0f);
+	std::uniform_real_distribution<float> yDist(100.0f, 300.0f);
+	std::uniform_int_distribution<int> attackDist(1, 5);
 
-		bulletPosition[0].y += bulletSpeed_;
+	nextEnemyPosition_ = {xDist(randomEngine_), yDist(randomEngine_)};
 
-		// 弾が画面外
-		if (bulletPosition[0].y > 720.0f) {
+	attackType_ = attackDist(randomEngine_);
 
-			isTimer_ = false;
-			isBulletActive_ = false;
+	// 攻撃終了後は敵を一度隠して移動
+	enemyPosition_ = {-1000.0f, -1000.0f};
+	enemyVisible_ = false;
+	isEnemyMoving_ = true;
+	enemyMoveTimer_ = 0.0f;
+}
 
-			enemyTimer_ = 0.0f;
+//==================================================
+// 攻撃開始
+//==================================================
 
-			// 敵を消す
-			sprite_->SetPosition({-1000.0f, -1000.0f});
+void Enemy::StartAttack() {
 
-			// 次の敵位置をランダム決定
-			std::random_device rd;
-			std::mt19937 gen(rd());
+	attackStarted_ = true;
+	bulletsSpawned_ = 0;
+	bulletSpawnTimer_ = 0.0f;
 
-			std::uniform_real_distribution<float> xDist(100.0f, 1180.0f);
-			std::uniform_real_distribution<float> yDist(100.0f, 300.0f);
+	switch (attackType_) {
+	case 1:
+		bulletsToSpawn_ = 1;
+		break;
 
-			nextEnemyPosition_ = {xDist(gen), yDist(gen)};
+	case 2:
+	case 3:
+	case 4:
+		bulletsToSpawn_ = 3;
+		break;
 
-			// 移動開始
-			isEnemyMoving_ = true;
-
-			// 次の攻撃をランダム
-			std::uniform_int_distribution<int> attackDist(1, 5);
-			attackType_ = attackDist(gen);
-		}
+	case 5:
+		bulletsToSpawn_ = 8;
+		break;
 	}
 }
 
 //==================================================
-// 2回目　3方向
+// 次の弾を1発発射
 //==================================================
 
-void Enemy::Second() {
+void Enemy::SpawnNextBullet() {
 
-	enemyTimer_ += 1.0f / 60.0f;
+	int i = bulletsSpawned_;
 
-	// 3方向弾開始
-	if (enemyTimer_ >= 2.0f && !isTimer_) {
+	bulletPosition[i] = enemyPosition_;
 
-		bulletPosition[0] = enemyPosition;
+	switch (attackType_) {
 
-		bulletPosition[1] = {enemyPosition.x - 50.0f, enemyPosition.y};
+	// 単発
+	case 1:
+		bulletVelocity[i] = {0.0f, bulletSpeed_};
+		break;
 
-		bulletPosition[2] = {enemyPosition.x + 50.0f, enemyPosition.y};
+	// 3方向。左右の位置をずらして順番に発射
+	case 2:
+		bulletPosition[i].x += (i - 1) * 50.0f;
+		bulletVelocity[i] = {0.0f, enemySpeed_};
+		break;
 
-		isTimer_ = true;
-		isBulletActive_ = true;
+	// 扇型。1発ごとに方向を変える
+	case 3:
+		bulletPosition[i].x += (i - 1) * 100.0f;
+		bulletVelocity[i] = {(i - 1) * 3.0f, enemySpeed_};
+		break;
+
+	// 分裂。親弾を発射し、後から左右へ分裂
+	case 4:
+		if (i == 0) {
+			bulletVelocity[i] = {0.0f, enemySpeed_};
+			splitTimer_ = 0.0f;
+			isSplit_ = false;
+		}
+		break;
+
+	// 8方向。各方向を順番に発射
+	case 5: {
+		const float angle = 2.0f * 3.14159265f * static_cast<float>(i) / 8.0f;
+
+		bulletVelocity[i] = {cosf(angle) * bulletSpeed_, sinf(angle) * bulletSpeed_};
+		break;
+	}
 	}
 
-	// 3方向弾移動
-	if (isTimer_) {
-
-		allOut = true;
-
-		for (int i = 0; i < 3; i++) {
-
-			bulletPosition[i].y += enemySpeed_;
-
-			// 1個でも画面内ならまだ終了しない
-			if (bulletPosition[i].y <= 720.0f) {
-				allOut = false;
-			}
-		}
-
-		// 3発全部画面外
-		if (allOut) {
-
-			isTimer_ = false;
-			isBulletActive_ = false;
-
-			allOut = false;
-
-			enemyTimer_ = 0.0f;
-
-			// 敵を消す
-			sprite_->SetPosition({-1000.0f, -1000.0f});
-
-			// 次の位置をランダム
-			std::random_device rd;
-			std::mt19937 gen(rd());
-
-			std::uniform_real_distribution<float> xDist(100.0f, 1180.0f);
-			std::uniform_real_distribution<float> yDist(100.0f, 300.0f);
-
-			nextEnemyPosition_ = {xDist(gen), yDist(gen)};
-
-			isEnemyMoving_ = true;
-
-			// 次の攻撃
-			std::uniform_int_distribution<int> attackDist(1, 5);
-			attackType_ = attackDist(gen);
-		}
-	}
+	bulletActive_[i] = true;
+	bulletsSpawned_++;
 }
 
 //==================================================
-// 3回目　扇型
+// 攻撃更新
 //==================================================
 
-void Enemy::Third() {
+void Enemy::UpdateAttack() {
 
-	enemyTimer_ += 1.0f / 60.0f;
+	enemyTimer_ += kDeltaTime;
 
-	// 扇型弾の生成
-	if (enemyTimer_ >= 2.0f && !isTimer_) {
+	// 攻撃開始まで待機
+	const float waitTime = (attackType_ == 5) ? 5.0f : 2.0f;
 
-		bulletPosition[0] = {enemyPosition.x - 100.0f, enemyPosition.y};
-
-		bulletPosition[1] = enemyPosition;
-
-		bulletPosition[2] = {enemyPosition.x + 100.0f, enemyPosition.y};
-
-		bulletVelocity[0] = {-3.0f, 5.0f};
-		bulletVelocity[1] = {0.0f, 5.0f};
-		bulletVelocity[2] = {3.0f, 5.0f};
-
-		isTimer_ = true;
-		isBulletActive_ = true;
+	if (!attackStarted_ && enemyTimer_ >= waitTime) {
+		StartAttack();
 	}
 
-	// 弾移動
-	if (isTimer_) {
-
-		allOut = true;
-
-		for (int i = 0; i < 3; i++) {
-
-			bulletPosition[i].x += bulletVelocity[i].x;
-			bulletPosition[i].y += bulletVelocity[i].y;
-
-			// 1個でも画面内なら終了しない
-			if (bulletPosition[i].y <= 720.0f) {
-				allOut = false;
-			}
-		}
-
-		// 3発全部画面外
-		if (allOut) {
-
-			isTimer_ = false;
-			isBulletActive_ = false;
-
-			allOut = false;
-
-			enemyTimer_ = 0.0f;
-
-			OutputDebugStringA("Third End!\n");
-
-			// 敵を消す
-			sprite_->SetPosition({-1000.0f, -1000.0f});
-
-			// 次の位置をランダム
-			std::random_device rd;
-			std::mt19937 gen(rd());
-
-			std::uniform_real_distribution<float> xDist(100.0f, 1180.0f);
-			std::uniform_real_distribution<float> yDist(100.0f, 300.0f);
-
-			nextEnemyPosition_ = {xDist(gen), yDist(gen)};
-
-			isEnemyMoving_ = true;
-
-			// 次の攻撃
-			std::uniform_int_distribution<int> attackDist(1, 5);
-			attackType_ = attackDist(gen);
-		}
-	}
-}
-
-//==================================================
-// 4回目　分裂
-//==================================================
-
-void Enemy::Fourth() {
-
-	enemyTimer_ += 1.0f / 60.0f;
-
-	// 4回目開始
-	if (enemyTimer_ >= 2.0f && !isTimer_) {
-
-		bulletPosition[0] = enemyPosition;
-
-		bulletVelocity[0] = {0.0f, 5.0f};
-
-		OutputDebugStringA("Fourth Start!\n");
-
-		isSplitActive_ = true;
-
-		isTimer_ = true;
-		isBulletActive_ = true;
-
-		isSplit_ = false;
-
-		splitTimer_ = 0.0f;
+	if (!attackStarted_) {
+		return;
 	}
 
-	// 親弾
-	if (isSplitActive_) {
+	// 一定時間ごとに1発だけ発射
+	bulletSpawnTimer_ += kDeltaTime;
 
-		bulletPosition[0].x += bulletVelocity[0].x;
-		bulletPosition[0].y += bulletVelocity[0].y;
+	if (bulletsSpawned_ < bulletsToSpawn_ && bulletSpawnTimer_ >= kSpawnInterval) {
 
-		splitTimer_ += 1.0f / 60.0f;
+		SpawnNextBullet();
+		bulletSpawnTimer_ = 0.0f;
+	}
 
-		// 分裂
-		if (splitTimer_ >= 0.5f && !isSplit_) {
+	// 分裂攻撃：親弾が発射されてから0.5秒後に左右へ分裂
+	if (attackType_ == 4 && bulletsSpawned_ >= 1 && bulletActive_[0] && !isSplit_) {
 
-			OutputDebugStringA("SPLIT!\n");
+		splitTimer_ += kDeltaTime;
 
+		if (splitTimer_ >= 0.5f) {
 			bulletPosition[1] = bulletPosition[0];
 			bulletPosition[2] = bulletPosition[0];
 
-			bulletVelocity[1] = {-3.0f, 5.0f};
-			bulletVelocity[2] = {3.0f, 5.0f};
+			bulletVelocity[1] = {-3.0f, enemySpeed_};
+			bulletVelocity[2] = {3.0f, enemySpeed_};
 
+			bulletActive_[1] = true;
+			bulletActive_[2] = true;
+
+			// 分裂後の弾も発射済みとして扱う
+			bulletsSpawned_ = 3;
 			isSplit_ = true;
 		}
 	}
 
-	// 分裂後
-	if (isSplit_) {
+	bool anyBulletAlive = false;
 
-		for (int i = 1; i < 3; i++) {
+	for (int i = 0; i < bulletsSpawned_; i++) {
 
-			bulletPosition[i].x += bulletVelocity[i].x;
-			bulletPosition[i].y += bulletVelocity[i].y;
+		if (!bulletActive_[i]) {
+			continue;
 		}
 
-		// 3発全部画面外
-		if (bulletPosition[0].y > 720.0f && bulletPosition[1].y > 720.0f && bulletPosition[2].y > 720.0f) {
+		bulletPosition[i].x += bulletVelocity[i].x;
+		bulletPosition[i].y += bulletVelocity[i].y;
 
-			isSplitActive_ = false;
-			isSplit_ = false;
+		const bool outside = bulletPosition[i].x < 0.0f || bulletPosition[i].x > kScreenWidth || bulletPosition[i].y < 0.0f || bulletPosition[i].y > kScreenHeight;
 
-			isTimer_ = false;
-			isBulletActive_ = false;
-
-			enemyTimer_ = 0.0f;
-
-			// 敵を消す
-			sprite_->SetPosition({-1000.0f, -1000.0f});
-
-			// 次の位置をランダム
-			std::random_device rd;
-			std::mt19937 gen(rd());
-
-			std::uniform_real_distribution<float> xDist(100.0f, 1180.0f);
-			std::uniform_real_distribution<float> yDist(100.0f, 300.0f);
-
-			nextEnemyPosition_ = {xDist(gen), yDist(gen)};
-
-			isEnemyMoving_ = true;
-
-			// 次の攻撃
-			std::uniform_int_distribution<int> attackDist(1, 5);
-			attackType_ = attackDist(gen);
+		if (outside) {
+			bulletActive_[i] = false;
+			bulletPosition[i] = {-1000.0f, -1000.0f};
+		} else {
+			anyBulletAlive = true;
 		}
 	}
-}
 
-//==================================================
-// 5回目　8方向
-//==================================================
+	// 全弾の発射が終わり、生きている弾がなくなったら次へ
+	if (bulletsSpawned_ >= bulletsToSpawn_ && !anyBulletAlive) {
 
-void Enemy::Eight() {
-
-	enemyTimer_ += 1.0f / 60.0f;
-
-	// 8方向弾を発射
-	if (enemyTimer_ >= 5.0f && !isTimer_) {
-
-		for (int i = 0; i < 8; i++) {
-
-			bulletPosition[i] = enemyPosition;
-
-			float angle = 3.141592f * 2.0f * i / 8.0f;
-
-			bulletVelocity[i].x = cosf(angle) * 5.0f;
-
-			bulletVelocity[i].y = sinf(angle) * 5.0f;
-		}
-
-		isTimer_ = true;
-		isBulletActive_ = true;
+		PrepareNextAttack();
 	}
-
-	// 弾を移動
-	if (isTimer_) {
-
-		// 最初は全部画面外
-		allOut = true;
-
-		for (int i = 0; i < 8; i++) {
-
-			bulletPosition[i].x += bulletVelocity[i].x;
-			bulletPosition[i].y += bulletVelocity[i].y;
-
-			// 1個でも画面内ならfalse
-			if (bulletPosition[i].x >= 0.0f && bulletPosition[i].x <= 1280.0f && bulletPosition[i].y >= 0.0f && bulletPosition[i].y <= 720.0f) {
-
-				allOut = false;
-			}
-		}
-
-		// 8個全部画面外
-		if (allOut) {
-
-			isTimer_ = false;
-			isBulletActive_ = false;
-
-			allOut = false;
-
-			enemyTimer_ = 0.0f;
-
-			// 敵を消す
-			sprite_->SetPosition({-1000.0f, -1000.0f});
-
-			// 次の位置をランダム
-			std::random_device rd;
-			std::mt19937 gen(rd());
-
-			std::uniform_real_distribution<float> xDist(100.0f, 1180.0f);
-			std::uniform_real_distribution<float> yDist(100.0f, 300.0f);
-
-			nextEnemyPosition_ = {xDist(gen), yDist(gen)};
-
-			isEnemyMoving_ = true;
-
-			// 次の攻撃
-			std::uniform_int_distribution<int> attackDist(1, 5);
-			attackType_ = attackDist(gen);
-		}
-	}
-}
-
-int Enemy::GetBulletCount() {
-	if (!isBulletActive_) {
-		return 0;
-	}
-
-	if (attackType_ == 1) {
-		return 1;
-	}
-
-	if (attackType_ == 5) {
-		return 8;
-	}
-
-	return 3;
 }
 
 //==================================================
@@ -437,92 +322,29 @@ int Enemy::GetBulletCount() {
 
 void Enemy::Update() {
 
-	// 敵が移動中なら攻撃しない
 	if (isEnemyMoving_) {
-
 		Move();
-
-		return;
+	} else {
+		UpdateAttack();
 	}
 
-	switch (attackType_) {
-
-	case 1:
-		Bullet();
-		break;
-
-	case 2:
-		Second();
-		break;
-
-	case 3:
-		Third();
-		break;
-
-	case 4:
-		Fourth();
-		break;
-
-	case 5:
-		Eight();
-		break;
-	}
+	SyncTransforms();
 }
 
 //==================================================
-// Draw
+// Draw：3Dモデルのみ
 //==================================================
 
 void Enemy::Draw() {
 
-	Sprite::PreDraw();
-
-	if (isBulletActive_) {
-
-		// 1：単発
-		if (attackType_ == 1) {
-
-			spriteBullet[0]->SetPosition(bulletPosition[0]);
-
-			spriteBullet[0]->Draw();
-		}
-
-		// 5：8方向
-		else if (attackType_ == 5) {
-
-			for (int i = 0; i < 8; i++) {
-
-				spriteBullet[i]->SetPosition(bulletPosition[i]);
-
-				spriteBullet[i]->Draw();
-			}
-		}
-
-		// 分裂
-		else if (isSplit_) {
-
-			for (int i = 0; i < 3; i++) {
-
-				spriteBullet[i]->SetPosition(bulletPosition[i]);
-
-				spriteBullet[i]->Draw();
-			}
-		}
-
-		// 2・3
-		else {
-
-			for (int i = 0; i < 3; i++) {
-
-				spriteBullet[i]->SetPosition(bulletPosition[i]);
-
-				spriteBullet[i]->Draw();
-			}
-		}
+	if (enemyVisible_) {
+		enemyModel_->Draw(enemyWt_, *camera_);
 	}
 
-	// 敵
-	sprite_->Draw();
+	for (int i = 0; i < 8; i++) {
 
-	Sprite::PostDraw();
+		if (bulletActive_[i]) {
+			bulletModel_->Draw(bulletWt_[i], *camera_);
+		}
+	}
 }

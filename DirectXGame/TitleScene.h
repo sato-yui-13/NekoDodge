@@ -10,7 +10,7 @@ public:
 	~TitleScene();
 	
 	// 初期化
-	void Initialize(KamataEngine::Camera* camera);
+	void Initialize();
 
 	
 

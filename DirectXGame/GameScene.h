@@ -19,7 +19,7 @@ public:
 	//enemyの当たり判定
 	void CheckCollisionEnemy();
 
-	player* GetPlayer() { return player_; }
+	//player* GetPlayer() { return player_; }
 
 	/// 更新
 	void Update();
@@ -28,21 +28,18 @@ public:
 	void Draw();
 
 private:
-	player* player_;
-	//Enemy* enemy_;
+	//player* player_;
+	Enemy* enemy_;
 	
-	
+	KamataEngine::Model* enemyModel_ = nullptr;
+	KamataEngine::Model* bulletModel_ = nullptr;
+
 	std::vector<Enemy*> enemies_;
 
 
 	//  カメラ
-	KamataEngine::Camera* camera_ = nullptr;
-	// 文字と背景
-	Title* title_ = nullptr;
+	KamataEngine::Camera* camera_;
+	
 	KamataEngine::Model* titleModel_;
-	//背景用
-	// playerのスプライト
-	//KamataEngine::Sprite* sprite_ = nullptr;
-	// playerのテクスチャ
-	//uint32_t ScreenHd = 0;
+	KamataEngine::Vector2 enemyPosition_;
 };

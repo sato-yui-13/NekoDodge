@@ -46,7 +46,7 @@ void ChangeScene() {
 		camera_.UpdateMatrix();
 
 		titleScene = new TitleScene();
-		titleScene->Initialize(&camera_);
+		titleScene->Initialize();
 
 		break;
 
@@ -102,16 +102,11 @@ void SceneUpdate() {
 
 		gameScene->Update();
 
-		if (gameScene->GetPlayer()->IsDead()) {
-
-			scene = Scene::kOver;
-			ChangeScene();
-		}
-
-		if (gameTimer >= 30.0f) {
-			scene = Scene::kClear;
-			ChangeScene();
-		}
+		
+		//if (gameTimer >= 30.0f) {
+		//	scene = Scene::kClear;
+		//	ChangeScene();
+		//}
 
 		break;
 
@@ -145,7 +140,7 @@ void SceneDraw() {
 	switch (scene) {
 
 	case Scene::kTitle:
-		OutputDebugStringA("TITLE DRAW\n");
+		
 		titleScene->Draw();
 		break;
 

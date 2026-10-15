@@ -14,9 +14,8 @@ TitleScene::~TitleScene() {
 	delete backScreen_;
 }
 
-void TitleScene::Initialize(Camera* camera) {
-	// assert(camera);
-	camera_ = camera;
+void TitleScene::Initialize() {
+	
 
 	// カメラ
 	camera_->Initialize();

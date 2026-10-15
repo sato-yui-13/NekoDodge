@@ -1,102 +1,48 @@
 #include "GameScene.h"
 #include <random>
 
-using namespace KamataEngine;
+    using namespace KamataEngine;
 
 GameScene::~GameScene() {
+	delete enemy_;
+	enemy_ = nullptr;
 
-	for (Enemy* enemy : enemies_) {
-		delete enemy;
-	}
+	delete enemyModel_;
+	enemyModel_ = nullptr;
 
-	enemies_.clear();
+	delete bulletModel_;
+	bulletModel_ = nullptr;
 }
 
 void GameScene::Initialize() {
-	titleModel_ = Model::CreateFromOBJ("title", true);
 
-	player_ = new player();
-	player_->Initialize();
+	// 敵と弾のモデルを作成
+	enemyModel_ = Model::CreateFromOBJ("flour", true);
+	bulletModel_ = Model::CreateFromOBJ("boll", true);
 
-
-
-
-	std::random_device rd;
-	std::mt19937 gen(rd());
-
-	// 敵の数 → 1～3体
-	std::uniform_int_distribution<int> enemyCountDist(4, 8);
-
-	// 敵のY座標 → ほぼ同じ高さ
-	std::uniform_real_distribution<float> enemyYDist(180.0f, 220.0f);
-
-	// 敵のX座標 → 画面内でランダム
-	std::uniform_real_distribution<float> enemyXDist(100.0f, 1180.0f);
-
-	int enemyCount = enemyCountDist(gen);
-
-	for (int i = 0; i < enemyCount; i++) {
-
-		Enemy* enemy = new Enemy();
-
-		Vector2 position = {enemyXDist(gen), enemyYDist(gen)};
-
-		enemy->Initialize(position);
-
-		enemies_.push_back(enemy);
-	}
-	// 背景
-	//   背景
-	//ScreenHd = TextureManager::Load("Title/screen.png");
-
-	//sprite_ = Sprite::Create(ScreenHd, {0, 0});
+	// 敵を生成して初期化
+	enemy_ = new Enemy();
+	enemy_->Initialize(enemyModel_, bulletModel_, camera_, enemyPosition_);
 }
 
 void GameScene::CheckCollisionEnemy() {
-
-	for (Enemy* enemy : enemies_) {
-		for (int i = 0; i < enemy->GetBulletCount(); i++) {
-			if (Collision::Check(player_->GetPosition(), player_->GetSize(), enemy->GetBulletPosition(i), enemy->GetSize())) {
-
-				// 敵の弾に当たった
-				player_->SetDead();
-			}
-		}
-	}
-
-	if (player_->IsDead()) {
-
-		// 死亡したときの処理
-		// げーむおーば
-	}
+	// いったん衝突判定は保留
 }
 
 void GameScene::Update() {
-	player_->Update();
-	for (Enemy* enemy : enemies_) {
-		enemy->Update();
+	if (enemy_) {
+		enemy_->Update();
 	}
-
-
-
 
 	CheckCollisionEnemy();
 }
 
 void GameScene::Draw() {
+	Model::PreDraw();
 
-	Sprite::PreDraw();
-	//sprite_->Draw();
-	Sprite::PostDraw();
-
-	player_->Draw();
-	for (Enemy* enemy : enemies_) {
-		enemy->Draw();
+	if (enemy_) {
+		enemy_->Draw();
 	}
 
-	// 3Dタイトル
-	Model::PreDraw();
-	// 背景
-	title_->Background();
 	Model::PostDraw();
 }
