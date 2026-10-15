@@ -1,59 +1,202 @@
-#include "title.h"
-#include <numbers>
+#include "GameClear.h"
+#include "GameOver.h"
+#include "GameScene.h"
+#include "KamataEngine.h"
+#include "TitleScene.h"
+#include <Windows.h>
 
 using namespace KamataEngine;
-Title::Title() {}
-Title::~Title() {}
+GameScene* gameScene = nullptr;
+GameOver* gameOver = nullptr;
 
-void Title::Initialize(Model* titleModel, Model* spaceModel, Model* screenModel, Camera* camera) {
-	//assert(titleModel);
-//	assert(spaceModel);
-	//assert(camera);
+GameClear* gameClear = nullptr;
 
-	// title
-	titleModel_ = titleModel;
-	titleWt_.Initialize();
-	titleWt_.translation_ = {0.0f, 0.0f, 0.0f};
-	titleWt_.TransferMatrix();
+Camera camera_;
 
-	// space
-	spaceModel_ = spaceModel;
-	spaceWt_.Initialize();
-	spaceWt_.translation_ = {0.0f, -10.0f, 0.0f};
-	// spaceWt_.rotation_.z = std::numbers::pi_v<float> / 2.0f;
-	spaceWt_.TransferMatrix();
+// BGM
+// uint32_t BGMHandle = 0;
+// uint32_t voiceHandle = 0;
+// シーン用ポインタ
+TitleScene* titleScene = nullptr;
+// シーン
+enum class Scene { kTitle, kGame, kOver, kClear };
 
-	// title
-	screenModel_ = screenModel;
-	screenWt_.Initialize();
-	screenWt_.translation_ = {0.0f, 0.0f, 0.0f};
-	screenWt_.TransferMatrix();
+// 現在のシーン
+Scene scene = Scene::kTitle;
 
-	// camera
-	camera_ = camera;
+// 前回のシーン
+Scene oldScene = Scene::kGame;
+float gameTimer = 0.0f;
+// シーン切り替え
+void ChangeScene() {
+
+	if (scene == oldScene) {
+		return;
+	}
+
+	switch (scene) {
+
+	case Scene::kTitle:
+		delete gameOver;
+		gameOver = nullptr;
+		// カメラを初期位置に戻す
+		camera_.Initialize();
+		camera_.translation_ = {0, 0, -20};
+		camera_.rotation_.x = 0.2f;
+		camera_.UpdateMatrix();
+
+		titleScene = new TitleScene();
+		titleScene->Initialize(&camera_);
+
+		break;
+
+	case Scene::kGame:
+		// OutputDebugStringA("Create GameScene\n");
+		delete titleScene;
+		titleScene = nullptr;
+		gameScene = new GameScene();
+		gameScene->Initialize();
+		gameTimer = 0.0f; // ★ここでリセット
+		break;
+	case Scene::kOver:
+
+		delete gameScene;
+		gameScene = nullptr;
+
+		gameOver = new GameOver();
+		gameOver->Initialize();
+
+		break;
+	case Scene::kClear:
+
+		delete gameScene;
+		gameScene = nullptr;
+
+		gameClear = new GameClear();
+		gameClear->Initialize();
+		break;
+	}
+
+	oldScene = scene;
 }
 
-void Title::Update() {
+// 更新
+void SceneUpdate() {
 
-	// spaceの文字をグラデーションにする
-	time_ += 0.03f;
-	wave = (sinf(time_) + 1.0f) * 0.5f;
-	alpha = 0.15f + wave * 0.85f;
+	gameTimer += 1.0f / 60.0f;
+	switch (scene) {
 
-	// SPACEモデルに透明度を反映
-	spaceModel_->SetAlpha(alpha);
+	case Scene::kTitle:
 
-	
+		titleScene->Update();
+		// アニメーション終わり次第ゲームシーンへ
+		if (titleScene->IsAnimEnd()) {
+			scene = Scene::kGame;
+			ChangeScene();
+			return;
+		}
+
+		break;
+
+	case Scene::kGame:
+
+		gameScene->Update();
+
+		// if (gameTimer >= 30.0f) {
+		//	scene = Scene::kClear;
+		//	ChangeScene();
+		// }
+
+		break;
+
+	case Scene::kOver:
+
+		gameOver->Update();
+		// エンターキーを押したらtitleへ
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			scene = Scene::kTitle;
+			ChangeScene();
+			return;
+		}
+		break;
+
+	case Scene::kClear:
+
+		gameClear->Update();
+		// エンターキーを押したらtitleへ
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			scene = Scene::kTitle;
+			ChangeScene();
+		}
+
+		break;
+	}
 }
 
-void Title::Draw() {
+// 描画
+void SceneDraw() {
 
-	// たいとる
-	titleModel_->Draw(titleWt_, *camera_);
-	// すぺーす
-	spaceModel_->Draw(spaceWt_, *camera_);
+	switch (scene) {
+
+	case Scene::kTitle:
+
+		titleScene->Draw();
+		break;
+
+	case Scene::kGame:
+
+		gameScene->Draw();
+
+		break;
+	case Scene::kOver:
+
+		gameOver->Draw();
+
+		break;
+	case Scene::kClear:
+		gameClear->Draw();
+		break;
+	}
 }
 
-void Title::Background() { // 背景
-	screenModel_->Draw(screenWt_, *camera_);
+// Windowsアプリでのエントリーポイント(main関数)
+int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
+
+	KamataEngine::Initialize();
+
+	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+
+	// サウンドデータの読み込み
+	// BGMHandle = Audio::GetInstance()->LoadWave("bgm/Shimmering.mp3");
+	// voiceHandle = Audio::GetInstance()->PlayWave(BGMHandle, true, 0.2f);
+
+	camera_.Initialize();
+	camera_.translation_ = {0, 0, -20};
+	camera_.rotation_.x = 0.2f;
+	camera_.UpdateMatrix();
+
+	// メインループ
+	while (true) {
+		// エンジンの更新
+
+		if (KamataEngine::Update()) {
+			break;
+		}
+
+		ChangeScene();
+		SceneUpdate();
+
+		dxCommon->PreDraw();
+		SceneDraw();
+		dxCommon->PostDraw();
+	}
+
+	// ゲームシーンの解放
+	delete gameScene;
+	// nullptrの代入
+	gameScene = nullptr;
+
+	KamataEngine::Finalize();
+
+	return 0;
 }
