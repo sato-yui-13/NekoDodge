@@ -7,7 +7,7 @@ TitleScene::TitleScene() {}
 
 TitleScene::~TitleScene() { delete sprite_; }
 
-void TitleScene::Initialize(Model* model, Camera* camera) { 
+void TitleScene::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera) { 
 
 	//releaseにするときエラーとして出る
 	assert(model);

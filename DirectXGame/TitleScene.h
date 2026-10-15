@@ -9,7 +9,7 @@ public:
 	~TitleScene();
 
 	// 3Dモデルの初期化
-	void Initialize(Model* model, Camera* camera);
+	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera);
 	// 2D用の初期化
 	void Initialize_2d();
 
@@ -23,10 +23,10 @@ private:
 	// モデル
 	KamataEngine::Model* model_ = nullptr;
 	// カメラ
-	Camera* camera_ = nullptr;
+	KamataEngine::Camera* camera_ = nullptr;
 
 	// 今位置
-	WorldTransform worldTransform_;
+	KamataEngine::WorldTransform worldTransform_;
 
 	// 背景
 	KamataEngine::Sprite* sprite_ = nullptr;
