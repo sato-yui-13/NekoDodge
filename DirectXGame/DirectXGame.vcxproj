@@ -174,7 +174,6 @@
     <ClCompile Include="player.cpp" />
     <ClCompile Include="Title.cpp" />
     <ClCompile Include="TitleScene.cpp" />
-    <ClCompile Include="TrackingEnemy.cpp" />
     <ClCompile Include="WorldTransformEx.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -285,7 +284,6 @@
     <ClInclude Include="player.h" />
     <ClInclude Include="Title.h" />
     <ClInclude Include="TitleScene.h" />
-    <ClInclude Include="TrackingEnemy.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

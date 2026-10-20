@@ -14,7 +14,7 @@ void Enemy::Initialize(KamataEngine::Model* enemyModel, KamataEngine::Model* bal
 	// 敵
 	enemyModel_ = enemyModel;
 	enemyWt_.Initialize();
-	enemyWt_.translation_ = {-10.0f, 0.0f, 0.0f};
+	enemyWt_.translation_ = {-10.0f, 2.0f, 0.0f};
 	enemyWt_.scale_ = {0.5f, 0.5f, 0.5f};
 	enemyWt_.TransferMatrix();
 	enemyWt_.UpdateMatrix();
