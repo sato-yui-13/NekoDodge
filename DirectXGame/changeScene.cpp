@@ -86,9 +86,9 @@ bool changeScene::IsCollision(int indexA, int indexB) {
 
 void changeScene::Update() {
 
-	// if (!isStart_ || isAnimEnd_) {
-	//	return;
-	// }
+	 if (!isStart_ || isAnimEnd_) {
+		return;
+	 }
 
 	frame_++;
 

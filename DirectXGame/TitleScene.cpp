@@ -6,22 +6,27 @@
 
 using namespace KamataEngine;
 
-TitleScene::TitleScene() {}
+TitleScene::TitleScene() {
+	// コンストラクタで nullptr 初期化しておくと安全です
+	camera_ = nullptr;
+}
 
 TitleScene::~TitleScene() {
 	delete title_;
 	delete changeScene_;
 	delete backScreen_;
+	delete camera_; // ★追加：カメラの解放
 }
 
 void TitleScene::Initialize() {
-	
 
-	// カメラ
+	// ★修正：new でカメラのインスタンスを生成する
+	camera_ = new Camera();
+
+	// カメラの初期化
 	camera_->Initialize();
-	camera_->translation_ = {0.0f, 0.0f, -10.0f};
-	camera_->rotation_ = {0.0f, 0.0f, 0.0f};
-
+	camera_->translation_ = {0.0f, 0.0f, -20.0f};
+	camera_->UpdateMatrix();
 	titleModel_ = Model::CreateFromOBJ("title", true);
 	spaceModel_ = Model::CreateFromOBJ("space", true);
 	screenModel_ = Model::CreateFromOBJ("titleScreen", true);
@@ -30,6 +35,8 @@ void TitleScene::Initialize() {
 	for (int i = 0; i < 10; i++) {
 		flourModel_[i] = Model::CreateFromOBJ("square", true);
 
+		// ※注意点：現在ループ内で10回同じ backScreen_ に対して Initialize を呼んでいます。
+		// もし flourModel_ を配列表記で渡す設計であれば、ループの外で行うか仕様を確認してください。
 		backScreen_->Initialize(flourModel_[i], camera_);
 	}
 
@@ -37,14 +44,11 @@ void TitleScene::Initialize() {
 	title_->Initialize(titleModel_, spaceModel_, screenModel_, camera_);
 
 	changeScene_ = new changeScene();
-	for (int i = 0; i < 100; i++) {
 
-		colorfulModel_[0] = Model::CreateFromOBJ("square", true);
+	colorfulModel_[0] = Model::CreateFromOBJ("square", true);
 
-		changeScene_->Initialize(colorfulModel_[0], camera_);
-	}
+	changeScene_->Initialize(colorfulModel_[0], camera_);
 }
-
 void TitleScene::Update() {
 
 	// SPACEキーを押したらゲーム開始
@@ -69,10 +73,9 @@ void TitleScene::Draw() {
 	} else {
 		changeScene_->Draw();
 	}
-	
-	
-	//背景
+
+	// 背景
 	title_->Background();
-	
+
 	Model::PostDraw();
 }

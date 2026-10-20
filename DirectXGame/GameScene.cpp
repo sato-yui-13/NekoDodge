@@ -1,7 +1,15 @@
 #include "GameScene.h"
 #include <random>
 
-    using namespace KamataEngine;
+using namespace KamataEngine;
+
+GameScene::GameScene() {
+	// ポインタの安全な初期化
+	camera_ = nullptr;
+	enemy_ = nullptr;
+	enemyModel_ = nullptr;
+	backgroundModel_ = nullptr;
+}
 
 GameScene::~GameScene() {
 	delete enemy_;
@@ -10,39 +18,54 @@ GameScene::~GameScene() {
 	delete enemyModel_;
 	enemyModel_ = nullptr;
 
-	delete bulletModel_;
-	bulletModel_ = nullptr;
+	// ★追加：カメラの解放
+	delete camera_;
+	camera_ = nullptr;
+
+	delete backgroundModel_;
+	backgroundModel_ = nullptr;
+	// delete bulletModel_;
+	// bulletModel_ = nullptr;
 }
 
 void GameScene::Initialize() {
+	//============= 背景 ============
+	backgroundModel_ = Model::CreateFromOBJ("titleScreen", true);
+	backgroundTransform_.Initialize();
+	backgroundTransform_.UpdateMatrix();
+	
+	//========== カメラ =============
+	camera_ = new Camera();
+	camera_->Initialize();
+	camera_->translation_ = {0.0f, 0.0f, -10.0f};
+	camera_->rotation_ = {0.0f, 0.0f, 0.0f};
+	camera_->UpdateMatrix();
 
-	// 敵と弾のモデルを作成
+	//========= player ===========
+	playerModel_ = Model::CreateFromOBJ("player", true);
+	player_ = new player();
+	player_->Initialize(playerModel_, camera_);
+
+	//======== 敵 ============
+	// 敵と弾のモデル
 	enemyModel_ = Model::CreateFromOBJ("flour", true);
-	bulletModel_ = Model::CreateFromOBJ("boll", true);
-
-	// 敵を生成して初期化
+	bollModel_ = Model::CreateFromOBJ("boll", true);
 	enemy_ = new Enemy();
-	enemy_->Initialize(enemyModel_, bulletModel_, camera_, enemyPosition_);
-}
+	enemy_->Initialize(enemyModel_, bollModel_, camera_);
 
-void GameScene::CheckCollisionEnemy() {
-	// いったん衝突判定は保留
 }
 
 void GameScene::Update() {
-	if (enemy_) {
-		enemy_->Update();
-	}
-
-	CheckCollisionEnemy();
+	//enemy_->Update();
+	player_->Update();
+	
 }
 
 void GameScene::Draw() {
 	Model::PreDraw();
 
-	if (enemy_) {
-		enemy_->Draw();
-	}
-
+	backgroundModel_->Draw(backgroundTransform_, *camera_);
+	//enemy_->Draw();
+	player_->Draw(); 
 	Model::PostDraw();
 }

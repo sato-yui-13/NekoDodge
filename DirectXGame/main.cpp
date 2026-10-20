@@ -39,9 +39,10 @@ void ChangeScene() {
 	case Scene::kTitle:
 		delete gameOver;
 		gameOver = nullptr;
+
 		// カメラを初期位置に戻す
 		camera_.Initialize();
-		camera_.translation_ = {0, 0, -20};
+		camera_.translation_ = {0, 40, -20};
 		camera_.rotation_.x = 0.2f;
 		camera_.UpdateMatrix();
 
@@ -54,7 +55,9 @@ void ChangeScene() {
 		// OutputDebugStringA("Create GameScene\n");
 		delete titleScene;
 		titleScene = nullptr;
+
 		gameScene = new GameScene();
+
 		gameScene->Initialize();
 		gameTimer = 0.0f; // ★ここでリセット
 		break;

@@ -1,46 +1,62 @@
 #pragma once
 #include "KamataEngine.h"
-#include <2d/Sprite.h>
+#include "math/Matrix4x4.h"
+#include "math/Vector3.h"
 
 class player {
 public:
 	// player();
 	~player();
 
-	void Initialize();
+	void Initialize(KamataEngine::Model* playerModel, KamataEngine::Camera* camera);
+
+	//キー入力
+	void InputMove();
+
+	//入場
+	void UpdateEntrance();
+
+	
+	//最初の操作　ゲームスタート前 操作確認
+	//void CheckTutorialInput();
+
 	void Update();
+
 	void Draw();
 
-	//位置
-	KamataEngine::Vector2 GetPosition();
-	//当たり判定
-	KamataEngine::Vector2 GetSize();
-	
-	
-	
 
-		// 死亡フラグ
-	bool IsDead() const { return isDead_; }
-
-	// 死亡させる
-	void SetDead() { isDead_ = true; }
 
 private:
+	// プレイヤーのモデル
+	KamataEngine::Model* playerModel_;
+	KamataEngine::WorldTransform playerWt_;
 
-	// 当たり判定用の数字
-	KamataEngine::Vector2 size_ = {64.0f, 64.0f};
-	// 死亡フラグ
-	bool isDead_ = false;
+	// カメラ
+	KamataEngine::Camera* camera_ = nullptr;
 
-	// 位置
-	KamataEngine::Vector2 position_ = {630, 450};
+
 	// 速度
-	KamataEngine::Vector2 velocity_ = {0, 0};
-	//
-	float speed_ = 4.0f;
-	//playerのスプライト
-	KamataEngine::Sprite* sprite_ = nullptr;
-	// playerのテクスチャ
-	uint32_t playerHd = 0;
+	KamataEngine::Vector2 velocity_ = {0.1f, 0.1f};
+	
+	//========== 入場 ============
+	//入場中か　これですたーとする
+	bool isEntrance_ = false;
+	//最初の位置
+	KamataEngine::Vector2 entranceStart_ = {-10.0f, -7.0f,};
+	////最後の位置
+	KamataEngine::Vector2 entranceEnd_ = {0.0f, 0.0f};
+	//startタイマー
+	float entranceTimer_ = 0.0f;
+	//経過時間
+	float entranceDuration_ = 1.0f;
 
+	//======== チュートリアル(操作) ===========
+	//チュートリアルフラグ
+	bool isTutorial = false;
+	//入力操作の確認フラグ
+	//bool isMoveW_ = false;
+	//bool isMoveA_ = false;
+	//bool isMoveS_ = false;
+	//bool isMoveD_ = false;
+	
 };

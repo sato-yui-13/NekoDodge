@@ -26,7 +26,7 @@ private:
 
 	bool IsCollision(int indexA, int indexB);
 
-	KamataEngine::Camera* camera_ = nullptr;
+	KamataEngine::Camera* camera_ ;
 	KamataEngine::Model* ballsModel_ = nullptr;
 
 	Colorful colorful[100];
