@@ -16,6 +16,7 @@ public:
 	//入場
 	void UpdateEntrance();
 
+	bool IsEntrance() { return isEntrance_; }
 	
 	//最初の操作　ゲームスタート前 操作確認
 	//void CheckTutorialInput();

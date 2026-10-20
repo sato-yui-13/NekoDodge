@@ -11,11 +11,12 @@ public:
 
 	void Update();
 	void Draw();
+	void UpdateEntrance();
 	void Move();
 
 private:
 	// 敵の位置
-	//KamataEngine::Vector2 enemyPosition = {100.0f, 100.0f};
+	// KamataEngine::Vector2 enemyPosition = {100.0f, 100.0f};
 
 	// 敵のモデル
 	KamataEngine::Model* enemyModel_;
@@ -28,10 +29,13 @@ private:
 	KamataEngine::Camera* camera_ = nullptr;
 
 	// ボールの出るフラグ
-	//bool isLaunched_ = false;
-	//画面外からの移動
-	//bool isEntering_ = false;
+	bool isLaunched_ = false;
+	// 画面外からの移動
+	// bool isEntering_ = false;
+
+	// 入場
+	// bool
 
 	////ボールの速度
-	float speed_ = 2.0f;
+	float speed_ = 0.05f;
 };

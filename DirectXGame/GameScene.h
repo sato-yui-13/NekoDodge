@@ -28,14 +28,14 @@ private:
 	//========= player ===========
 	player* player_=nullptr;
 	KamataEngine::Model* playerModel_;
-	
+	//入場開始
 
 
 	//=========== 敵 ==============
 	Enemy* enemy_ = nullptr;
 	KamataEngine::Model* enemyModel_;
 	KamataEngine::Model* bollModel_;
-	
+	bool isEnemyEntranceStarted_ = false;
 
 	
 

@@ -56,8 +56,22 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
-	//enemy_->Update();
 	player_->Update();
+	
+	
+	if (!player_->IsEntrance() && !isEnemyEntranceStarted_) {
+		// 敵の入場開始処理
+		isEnemyEntranceStarted_ = true;
+		
+	}
+
+
+	if (isEnemyEntranceStarted_) {
+	
+	enemy_->UpdateEntrance();
+	}
+	//enemy_->Update();
+
 	
 }
 
@@ -65,7 +79,7 @@ void GameScene::Draw() {
 	Model::PreDraw();
 
 	backgroundModel_->Draw(backgroundTransform_, *camera_);
-	//enemy_->Draw();
+	enemy_->Draw();
 	player_->Draw(); 
 	Model::PostDraw();
 }
