@@ -93,6 +93,10 @@ void player::UpdateEntrance() {
 //}
 #pragma endregion
 
+void player::TakeDamage() { hp_--; }
+bool player::IsDead() {return hp_ <= 0; }
+
+
 void player::Update() {
 	
 	if (isEntrance_) {
@@ -112,3 +116,5 @@ void player::Draw() {
 	playerModel_->Draw(playerWt_, *camera_); 
 
 }
+
+

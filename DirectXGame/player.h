@@ -21,11 +21,15 @@ public:
 	//最初の操作　ゲームスタート前 操作確認
 	//void CheckTutorialInput();
 
+	//hp
+	void TakeDamage();
+
 	void Update();
 
 	void Draw();
 
-
+	//現在位置の共有
+	KamataEngine::WorldTransform* GetWorldTransform() { return &playerWt_; }
 
 private:
 	// プレイヤーのモデル
@@ -34,7 +38,6 @@ private:
 
 	// カメラ
 	KamataEngine::Camera* camera_ = nullptr;
-
 
 	// 速度
 	KamataEngine::Vector2 velocity_ = {0.1f, 0.1f};
@@ -59,5 +62,9 @@ private:
 	//bool isMoveA_ = false;
 	//bool isMoveS_ = false;
 	//bool isMoveD_ = false;
+
+	//================= hp =================
+	bool IsDead();
+	int hp_ = 1;
 	
 };

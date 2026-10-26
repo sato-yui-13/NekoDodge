@@ -26,7 +26,7 @@ Scene scene = Scene::kTitle;
 
 // 前回のシーン
 Scene oldScene = Scene::kGame;
-float gameTimer = 0.0f;
+//float gameTimer = 0.0f;
 // シーン切り替え
 void ChangeScene() {
 
@@ -59,7 +59,7 @@ void ChangeScene() {
 		gameScene = new GameScene();
 
 		gameScene->Initialize();
-		gameTimer = 0.0f; // ★ここでリセット
+		//gameTimer = 0.0f; // ★ここでリセット
 		break;
 	case Scene::kOver:
 
@@ -86,7 +86,7 @@ void ChangeScene() {
 // 更新
 void SceneUpdate() {
 
-	gameTimer += 1.0f / 60.0f;
+	//gameTimer += 1.0f / 60.0f;
 	switch (scene) {
 
 	case Scene::kTitle:

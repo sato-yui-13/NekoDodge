@@ -34,9 +34,8 @@ private:
 	//=========== 敵 ==============
 	Enemy* enemy_ = nullptr;
 	KamataEngine::Model* enemyModel_;
-	KamataEngine::Model* bollModel_;
 	bool isEnemyEntranceStarted_ = false;
-
+	//KamataEngine::WorldTransform *target_,
 	
 
 

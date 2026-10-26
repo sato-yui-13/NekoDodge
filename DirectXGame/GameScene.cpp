@@ -45,13 +45,13 @@ void GameScene::Initialize() {
 	playerModel_ = Model::CreateFromOBJ("player", true);
 	player_ = new player();
 	player_->Initialize(playerModel_, camera_);
-
+	KamataEngine::WorldTransform* target_ = player_->GetWorldTransform();
 	//======== 敵 ============
 	// 敵と弾のモデル
 	enemyModel_ = Model::CreateFromOBJ("flour", true);
-	bollModel_ = Model::CreateFromOBJ("boll", true);
+	//bollModel_ = Model::CreateFromOBJ("boll", true);
 	enemy_ = new Enemy();
-	enemy_->Initialize(enemyModel_, bollModel_, camera_);
+	enemy_->Initialize(enemyModel_, target_, camera_, player_);
 
 }
 
@@ -67,10 +67,13 @@ void GameScene::Update() {
 
 
 	if (isEnemyEntranceStarted_) {
-	
-	enemy_->UpdateEntrance();
+		if (!enemy_->IsEntranceFinished()) {
+			enemy_->UpdateEntrance();
+		} else {
+			enemy_->Update();
+		}
 	}
-	//enemy_->Update();
+	
 
 	
 }

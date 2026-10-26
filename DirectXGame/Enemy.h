@@ -1,40 +1,55 @@
 #pragma once
+#include "Bullet.h"
 #include "KamataEngine.h"
+#include <vector>
 #include <random>
 
 using namespace KamataEngine;
+
+class player;
+
+
 class Enemy {
 public:
 	~Enemy();
 
-	void Initialize(KamataEngine::Model* enemyModel, KamataEngine::Model* ballModel, KamataEngine::Camera* camera);
+	void Initialize(KamataEngine::Model* enemyModel, KamataEngine::WorldTransform* target, KamataEngine::Camera* camera, player* player);
+
+	//入場フラグ
+	void UpdateEntrance();
+
+	void Move();
+
 
 	void Update();
 	void Draw();
-	void UpdateEntrance();
-	void Move();
+
+
+	bool IsEntranceFinished() { return isEntranceFinished_; };
+
 
 private:
-	// 敵の位置
-	// KamataEngine::Vector2 enemyPosition = {100.0f, 100.0f};
-
-	// 敵のモデル
-	KamataEngine::Model* enemyModel_;
-	KamataEngine::WorldTransform enemyWt_;
-	// 攻撃するball
-	KamataEngine::Model* ballModel_;
-	KamataEngine::WorldTransform ballWt_;
-
 	// カメラ
 	KamataEngine::Camera* camera_ = nullptr;
 
-	// ボールの出るフラグ
-	bool isLaunched_ = false;
-	// 画面外からの移動
-	// bool isEntering_ = false;
+	//========== Bullet =============
+	std::vector<Bullet*> bullets_;
+	KamataEngine::WorldTransform* target_;
+	KamataEngine::Model* bollModel_;
+	player* player_ = nullptr;
 
-	// 入場
-	// bool
+
+	//========== 敵のモデル ==============
+	KamataEngine::Model* enemyModel_;
+	KamataEngine::WorldTransform enemyWt_;
+	
+
+	
+
+	// ボールの出るフラグ
+	//bool isLaunched_ = false;
+	bool isEntranceFinished_ = false;
+
 
 	////ボールの速度
 	float speed_ = 0.05f;
