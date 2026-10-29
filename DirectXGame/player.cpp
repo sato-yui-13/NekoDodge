@@ -27,19 +27,41 @@ void player::InputMove() {
 	// 左右
 	if (Input::GetInstance()->PushKey(DIK_D)) {
 		playerWt_.translation_.x += velocity_.x;
+
+		//向き
+		playerWt_.rotation_.z = 1.0f;
+		direction_.x = 1.0f;
+		direction_.y = 0.0f;
 	}
 
 	if (Input::GetInstance()->PushKey(DIK_A)) {
 		playerWt_.translation_.x -= velocity_.x;
+
+		//向き
+		playerWt_.rotation_.z = -1.0f;
+		direction_.x = -1.0f;
+		direction_.y = 0.0f;
+
 	}
 
 	// 前後
 	if (Input::GetInstance()->PushKey(DIK_W)) {
 		playerWt_.translation_.y += velocity_.y;
+
+
+		// 向き
+		playerWt_.rotation_.z = -1.0f;
+		direction_.x = 0.0f;
+		direction_.y = 1.0f;
 	}
 
 	if (Input::GetInstance()->PushKey(DIK_S)) {
 		playerWt_.translation_.y -= velocity_.y;
+
+		// 向き
+		playerWt_.rotation_.z = -1.0f;
+		direction_.x = 0.0f;
+		direction_.y = -1.0f;
 	}
 
 	//playerWt_.UpdateMatrix();

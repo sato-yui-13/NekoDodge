@@ -15,12 +15,12 @@ TitleScene::~TitleScene() {
 	delete title_;
 	delete changeScene_;
 	delete backScreen_;
-	delete camera_; // ★追加：カメラの解放
+	delete camera_; 
 }
 
 void TitleScene::Initialize() {
 
-	// ★修正：new でカメラのインスタンスを生成する
+
 	camera_ = new Camera();
 
 	// カメラの初期化

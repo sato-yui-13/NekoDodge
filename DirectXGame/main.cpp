@@ -26,8 +26,8 @@ Scene scene = Scene::kTitle;
 
 // 前回のシーン
 Scene oldScene = Scene::kGame;
-//float gameTimer = 0.0f;
-// シーン切り替え
+// float gameTimer = 0.0f;
+//  シーン切り替え
 void ChangeScene() {
 
 	if (scene == oldScene) {
@@ -59,7 +59,7 @@ void ChangeScene() {
 		gameScene = new GameScene();
 
 		gameScene->Initialize();
-		//gameTimer = 0.0f; // ★ここでリセット
+		// gameTimer = 0.0f; // ★ここでリセット
 		break;
 	case Scene::kOver:
 
@@ -86,13 +86,13 @@ void ChangeScene() {
 // 更新
 void SceneUpdate() {
 
-	//gameTimer += 1.0f / 60.0f;
+	// gameTimer += 1.0f / 60.0f;
 	switch (scene) {
 
 	case Scene::kTitle:
 
 		titleScene->Update();
-		//アニメーション終わり次第ゲームシーンへ
+		// アニメーション終わり次第ゲームシーンへ
 		if (titleScene->IsAnimEnd()) {
 			scene = Scene::kGame;
 			ChangeScene();
@@ -105,24 +105,34 @@ void SceneUpdate() {
 
 		gameScene->Update();
 
-		
-		//if (gameTimer >= 30.0f) {
-		//	scene = Scene::kClear;
-		//	ChangeScene();
-		//}
+		if (gameScene->IsExplosionFinished()) {
+			scene = Scene::kOver;
+			ChangeScene();
+			return;
+		}
 
 		break;
 
-	case Scene::kOver:
+	case Scene::kOver: {
 
 		gameOver->Update();
-		// エンターキーを押したらtitleへ
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+
+		int selection = gameOver->ConfirmSelection();
+
+		if (selection == 0) {
+			// リスタート
+			scene = Scene::kGame;
+			ChangeScene();
+			return;
+		} else if (selection == 1) {
+			// タイトルに戻る
 			scene = Scene::kTitle;
 			ChangeScene();
 			return;
 		}
+
 		break;
+	}
 
 	case Scene::kClear:
 
@@ -143,7 +153,7 @@ void SceneDraw() {
 	switch (scene) {
 
 	case Scene::kTitle:
-		
+
 		titleScene->Draw();
 		break;
 

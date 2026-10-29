@@ -23,6 +23,7 @@ public:
 
 	//hp
 	void TakeDamage();
+	bool IsDead();
 
 	void Update();
 
@@ -41,6 +42,10 @@ private:
 
 	// 速度
 	KamataEngine::Vector2 velocity_ = {0.1f, 0.1f};
+
+	//向き 上向きスタート
+	KamataEngine::Vector2 direction_ = {0.0f, 1.0f};
+
 	
 	//========== 入場 ============
 	//入場中か　これですたーとする
@@ -64,7 +69,7 @@ private:
 	//bool isMoveD_ = false;
 
 	//================= hp =================
-	bool IsDead();
-	int hp_ = 1;
+	
+	int hp_ = 2;
 	
 };
