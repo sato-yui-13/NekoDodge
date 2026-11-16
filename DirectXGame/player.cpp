@@ -1,7 +1,7 @@
 #include "player.h"
 #include <Windows.h>
+#include <cmath>
 #include <string>
-
 using namespace KamataEngine;
 
 player::~player() {}
@@ -20,6 +20,10 @@ void player::Initialize(KamataEngine::Model* playerModel, KamataEngine::Camera* 
 	isEntrance_ = true;
 	entranceStart_.x = playerWt_.translation_.x;
 	entranceStart_.y = playerWt_.translation_.y;
+
+	playerBulletModel_ = Model::CreateFromOBJ("playerBoll", true);
+	// PlayerBullet* PlayerBullet_ = new PlayerBullet();
+	// PlayerBullet_->Initialize(playerBulletModel_, camera, direction_, playerWt_.translation_);
 }
 
 void player::InputMove() {
@@ -28,7 +32,7 @@ void player::InputMove() {
 	if (Input::GetInstance()->PushKey(DIK_D)) {
 		playerWt_.translation_.x += velocity_.x;
 
-		//向き
+		// 向き
 		playerWt_.rotation_.z = 1.0f;
 		direction_.x = 1.0f;
 		direction_.y = 0.0f;
@@ -37,17 +41,15 @@ void player::InputMove() {
 	if (Input::GetInstance()->PushKey(DIK_A)) {
 		playerWt_.translation_.x -= velocity_.x;
 
-		//向き
+		// 向き
 		playerWt_.rotation_.z = -1.0f;
 		direction_.x = -1.0f;
 		direction_.y = 0.0f;
-
 	}
 
 	// 前後
 	if (Input::GetInstance()->PushKey(DIK_W)) {
 		playerWt_.translation_.y += velocity_.y;
-
 
 		// 向き
 		playerWt_.rotation_.z = -1.0f;
@@ -64,7 +66,29 @@ void player::InputMove() {
 		direction_.y = -1.0f;
 	}
 
-	//playerWt_.UpdateMatrix();
+	// playerWt_.UpdateMatrix();
+}
+
+void player::Attack() {
+	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+
+		float directionX = targetPosition_.x - playerWt_.translation_.x;
+		float directionY = targetPosition_.y - playerWt_.translation_.y;
+
+		float length = sqrt(directionX * directionX + directionY * directionY);
+		directionX = directionX / length;
+		directionY = directionY / length;
+		Vector2 direction = {directionX, directionY};
+
+		PlayerBullet* PlayerBullet_ = new PlayerBullet();
+		PlayerBullet_->Initialize(playerBulletModel_, camera_, direction, playerWt_.translation_);
+		playerBullets_.push_back(PlayerBullet_);
+
+		if (length > 0.0f) {
+			directionX = directionX / length;
+			directionY = directionY / length;
+		}
+	}
 }
 
 void player::UpdateEntrance() {
@@ -86,8 +110,6 @@ void player::UpdateEntrance() {
 
 	playerWt_.translation_.x = x;
 	playerWt_.translation_.y = y;
-
-
 }
 
 #pragma region CheckTutorialInput
@@ -116,27 +138,32 @@ void player::UpdateEntrance() {
 #pragma endregion
 
 void player::TakeDamage() { hp_--; }
-bool player::IsDead() {return hp_ <= 0; }
-
-
+bool player::IsDead() { return hp_ <= 0; }
+void player::SetTargetPosition(KamataEngine::Vector3 position) { targetPosition_ = position; }
 void player::Update() {
-	
+
 	if (isEntrance_) {
 		// 入場
 		UpdateEntrance();
 	} else {
+
 		// キー入力
 		InputMove();
+		Attack();
 		// CheckTutorialInput();
+	}
+	for (int i = 0; i < playerBullets_.size(); i++) {
+		playerBullets_[i]->Update();
+		// 弾のUpdate
 	}
 
 	playerWt_.UpdateMatrix();
 }
 
-void player::Draw() { 
-	
-	playerModel_->Draw(playerWt_, *camera_); 
+void player::Draw() {
 
+	playerModel_->Draw(playerWt_, *camera_);
+	for (int i = 0; i < playerBullets_.size(); i++) {
+		playerBullets_[i]->Draw();
+	}
 }
-
-

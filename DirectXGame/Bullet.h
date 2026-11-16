@@ -1,27 +1,41 @@
 #pragma once
 #include "KamataEngine.h"
-#include <random>
 #include "player.h"
+#include <random>
 class Bullet {
 public:
 	// Bullet();
 	~Bullet();
 
-	void Initialize(KamataEngine::WorldTransform* target, KamataEngine::Vector3 position, KamataEngine::Model* ballModel, KamataEngine::Camera* camera, player* player);
+	
+	// フラグの定義
+	enum class MoveType {
+		Homing,
+		Straight,
+	};
+
+
+
+	void Initialize(
+	    KamataEngine::WorldTransform* target, KamataEngine::Vector3 position, KamataEngine::Model* ballModel, KamataEngine::Camera* camera, player* player, float speed_, Bullet::MoveType moveType,
+	    KamataEngine::Vector2 direction );
 
 	// 初期位置更新
 	void SetPosition(KamataEngine::Vector3 position);
 
+	// 直線
+	void StraightMove();
+
 	// 当たり判定
 	bool CheckCollision();
+	bool IsHit() const { return isHit_; }
 
 	// 動く関数呼び出す
 	void Update();
 	void Draw();
 
 private:
-	
-
+	MoveType moveType_ = MoveType::Homing;
 	// 追尾
 	void Homing();
 
@@ -44,6 +58,9 @@ private:
 	KamataEngine::Vector2 targetPosition_ = {0.0f, 0.0f};
 
 	player* player_;
-	//あたっているか
+	// あたっているか
 	bool isHit_ = false;
+
+	// 5っの向き
+	KamataEngine::Vector2 direction_;
 };

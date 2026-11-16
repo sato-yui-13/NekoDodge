@@ -30,7 +30,10 @@ public:
 	void Draw();
 
 private:
-	
+
+	//死んだあと
+	void CreateEnemy();
+
 	//========= player ===========
 	player* player_=nullptr;
 	KamataEngine::Model* playerModel_;
@@ -39,10 +42,16 @@ private:
 
 
 	//=========== 敵 ==============
-	Enemy* enemy_ = nullptr;
+	std::vector<Enemy*> enemies_;
 	KamataEngine::Model* enemyModel_;
 	bool isEnemyEntranceStarted_ = false;
+	KamataEngine::WorldTransform* target_ = nullptr;
 	//KamataEngine::WorldTransform *target_,
+	//攻撃パターンのカウント
+	int enemySpawnCount_ = 0;
+	// 何対でているか
+	int enemiesPerWave_ = 1;
+
 	
 	//========== パーティクル ============
 	std::vector<Particle*> particles_;
@@ -56,5 +65,6 @@ private:
 	
 	//========= カメラ ===========  
 	KamataEngine::Camera* camera_ = nullptr;
+	float gameTimer_ = 0.0f;
 	
 };

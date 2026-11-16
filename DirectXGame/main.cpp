@@ -26,8 +26,17 @@ Scene scene = Scene::kTitle;
 
 // 前回のシーン
 Scene oldScene = Scene::kGame;
-// float gameTimer = 0.0f;
-//  シーン切り替え
+// 時間
+float gameTimer = 0.0f;
+// 仮のclear
+float clearTimer = 0.0f;
+bool isClearEffect = false;
+
+//白くなる
+uint32_t whiteTextureHandle = 0;
+Sprite* whiteSprite = nullptr;
+
+// シーン切り替え
 void ChangeScene() {
 
 	if (scene == oldScene) {
@@ -59,7 +68,10 @@ void ChangeScene() {
 		gameScene = new GameScene();
 
 		gameScene->Initialize();
-		// gameTimer = 0.0f; // ★ここでリセット
+		gameTimer = 0.0f; // ★ここでリセット
+		clearTimer = 0.0f;
+		isClearEffect = false;
+
 		break;
 	case Scene::kOver:
 
@@ -104,6 +116,29 @@ void SceneUpdate() {
 	case Scene::kGame:
 
 		gameScene->Update();
+
+		gameTimer += 1.0f / 60.0f;
+
+		// if (gameTimer >= 30.0f) {
+		//	scene = Scene::kClear;
+		//	ChangeScene();
+		//	return;
+		// }
+
+		if (gameTimer >= 10.0f && !isClearEffect) {
+			isClearEffect = true;
+		}
+
+		if (isClearEffect) {
+			clearTimer += 1.0f / 60.0f;
+		}
+
+
+		if (clearTimer >= 1.0f) {
+			scene = Scene::kClear;
+			ChangeScene();
+			return;
+		}
 
 		if (gameScene->IsExplosionFinished()) {
 			scene = Scene::kOver;
@@ -161,6 +196,14 @@ void SceneDraw() {
 
 		gameScene->Draw();
 
+		if (isClearEffect) {
+			whiteSprite->SetColor({1.0f, 1.0f, 1.0f, clearTimer});
+			Sprite::PreDraw();
+			whiteSprite->Draw();
+			Sprite::PostDraw();
+			
+		}
+
 		break;
 	case Scene::kOver:
 
@@ -177,6 +220,11 @@ void SceneDraw() {
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	KamataEngine::Initialize();
+
+
+	whiteTextureHandle = TextureManager::Load("white1x1.png");
+	whiteSprite = Sprite::Create(whiteTextureHandle, {0, 0});
+	whiteSprite->SetSize({1280.0f, 720.0f});
 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 

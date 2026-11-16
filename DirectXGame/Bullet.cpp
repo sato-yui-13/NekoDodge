@@ -1,26 +1,28 @@
 #include "Bullet.h"
-#include <Windows.h>
 #include "player.h"
+#include <Windows.h>
 #include <cmath>
 #include <string>
 using namespace KamataEngine;
 
 Bullet::~Bullet() {}
 
-void Bullet::Initialize(KamataEngine::WorldTransform* target, KamataEngine::Vector3 position, KamataEngine::Model* ballModel, KamataEngine::Camera* camera, player* player) {
+void Bullet::Initialize(
+    KamataEngine::WorldTransform* target, KamataEngine::Vector3 position, KamataEngine::Model* ballModel, KamataEngine::Camera* camera, player* player, float speed_, Bullet::MoveType moveType,
+    KamataEngine::Vector2 direction) {
 	player_ = player;
 	target_ = target;
 	camera_ = camera;
 	ballModel_ = ballModel;
 
+	direction_ = direction;
+	moveType_ = moveType;
 	bulletWt_.Initialize();
 	bulletWt_.translation_ = position;
 	bulletWt_.scale_ = {0.5f, 0.5f, 0.5f};
 	bulletWt_.TransferMatrix();
 	bulletWt_.UpdateMatrix();
-
-
-	
+	speed = speed_;
 }
 
 void Bullet::Homing() {
@@ -58,25 +60,36 @@ void Bullet::SetPosition(KamataEngine::Vector3 position) {
 	bulletWt_.UpdateMatrix();
 }
 
+void Bullet::StraightMove() {
+	// 直線
+	bulletWt_.translation_.x += direction_.x * speed;
+	bulletWt_.translation_.y += direction_.y * speed;
+}
+
 bool Bullet::CheckCollision() {
 
 	float dx = bulletWt_.translation_.x - target_->translation_.x;
 	float dy = bulletWt_.translation_.y - target_->translation_.y;
-	
+
 	float distance = std::sqrt(dx * dx + dy * dy);
 
 	if (distance <= 1.0f) {
 		return true;
 	}
-	
-	return false; }
 
-
+	return false;
+}
 
 void Bullet::Update() {
-	Homing();
 
-	
+	if (moveType_ == MoveType::Homing) {
+		// 追尾処理
+		Homing();
+	} else if (moveType_ == MoveType::Straight) {
+		// 直線移動処理
+
+		StraightMove();
+	}
 
 	if (!isHit_ && CheckCollision()) {
 		player_->TakeDamage();

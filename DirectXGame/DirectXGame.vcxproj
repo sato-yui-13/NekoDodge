@@ -175,6 +175,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="PlayerBullet.cpp" />
     <ClCompile Include="Title.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="WorldTransformEx.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="PlayerBullet.h" />
     <ClInclude Include="Title.h" />
     <ClInclude Include="TitleScene.h" />
   </ItemGroup>

@@ -3,6 +3,10 @@
 #include "math/Matrix4x4.h"
 #include "math/Vector3.h"
 
+#include "PlayerBullet.h"
+#include <vector>
+
+
 class player {
 public:
 	// player();
@@ -12,6 +16,9 @@ public:
 
 	//キー入力
 	void InputMove();
+	//攻撃
+	void Attack();
+
 
 	//入場
 	void UpdateEntrance();
@@ -29,8 +36,12 @@ public:
 
 	void Draw();
 
+	std::vector<PlayerBullet*>& GetPlayerBullets() { return playerBullets_; }
+
 	//現在位置の共有
 	KamataEngine::WorldTransform* GetWorldTransform() { return &playerWt_; }
+	//狙うやつ
+	void SetTargetPosition(KamataEngine::Vector3 position);
 
 private:
 	// プレイヤーのモデル
@@ -70,6 +81,14 @@ private:
 
 	//================= hp =================
 	
-	int hp_ = 2;
-	
+	int hp_ = 6;
+
+	//============== ボール =============
+	std::vector<PlayerBullet*> playerBullets_;
+	KamataEngine::Model* playerBulletModel_ = nullptr;
+
+
+	//狙うやつ
+	KamataEngine::Vector3 targetPosition_ = {0.0f, 0.0f, 0.0f};
+
 };

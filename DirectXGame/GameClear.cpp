@@ -8,7 +8,7 @@ GameClear::~GameClear() { delete sprite_; }
 
 void GameClear::Initialize() {
 	// 背景
-	textureHandle_ = TextureManager::Load("Title/GameClear.png");
+	textureHandle_ = TextureManager::Load("clear/GameClear.png");
 	sprite_ = Sprite::Create(textureHandle_, {0, 0});
 }
 
