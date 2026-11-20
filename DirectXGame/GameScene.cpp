@@ -121,7 +121,11 @@ void GameScene::CreateEnemy() {
 		} else if (enemySpawnCount_ == 3) {
 
 			enemy->SetAttackType(Enemy::AttackType::Fan);
+		} else if (enemySpawnCount_ == 4) {
+
+			enemy->SetAttackType(Enemy::AttackType::Rain);
 		}
+
 
 		enemySpawnCount_++;
 

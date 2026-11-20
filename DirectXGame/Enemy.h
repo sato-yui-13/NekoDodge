@@ -16,9 +16,11 @@ public:
 
 	enum class AttackType
 	{
-		Homing, 
-		Fan 
+		Homing, //追尾
+		Fan,//扇型
+		Rain,//横一列
 	};
+
 	void SetAttackType(AttackType type) { attackType_ = type; }
 
 	void Initialize(KamataEngine::Model* enemyModel, KamataEngine::WorldTransform* target, KamataEngine::Camera* camera, player* player, KamataEngine::Vector3 position, bool isFirstEnemy);
@@ -37,6 +39,9 @@ public:
 	void FireFanBullet();
 
 	bool IsEntranceFinished() { return isEntranceFinished_; };
+	
+	//横一列
+	void FireRainBullet();
 
 	// 死ぬ
 	bool IsDead() const { return isDead_; }
@@ -77,7 +82,9 @@ private:
 
 	//========= 5の方向用 ===============
 	float fanAttackTimer_ = 0.0f;
-
+	//========= 横一列 ===============
+	float rainAttackTimer_ = 0.0f;
+	bool isRainFired_ = false;
 
 	//========== 敵のモデル ==============
 	KamataEngine::Model* enemyModel_;

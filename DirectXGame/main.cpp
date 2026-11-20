@@ -125,7 +125,7 @@ void SceneUpdate() {
 		//	return;
 		// }
 
-		if (gameTimer >= 10.0f && !isClearEffect) {
+		if (gameTimer >= 40.0f && !isClearEffect) {
 			isClearEffect = true;
 		}
 

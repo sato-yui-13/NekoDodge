@@ -25,7 +25,7 @@ void Enemy::Initialize(KamataEngine::Model* enemyModel, KamataEngine::WorldTrans
 	enemyModel_ = enemyModel;
 	enemyWt_.Initialize();
 	enemyWt_.translation_ = {position.x, position.y, position.z};
-	//方向処理
+	// 方向処理
 	entranceDirection_.x = -position.x;
 	entranceDirection_.y = -position.y;
 
@@ -75,17 +75,14 @@ void Enemy::FireFanBullet() {
 		direction.x = std::cos(bulletAngle);
 		direction.y = std::sin(bulletAngle);
 
-		 Bullet* bullet = new Bullet();
-		 Vector3 bulletPosition = enemyWt_.translation_;
-		 bullet->Initialize(target_, bulletPosition, bollModel_, camera_, player_, 0.08f, Bullet::MoveType::Straight, direction);
-		 bullets_.push_back(bullet);
-	
+		Bullet* bullet = new Bullet();
+		Vector3 bulletPosition = enemyWt_.translation_;
+		bullet->Initialize(target_, bulletPosition, bollModel_, camera_, player_, 0.08f, Bullet::MoveType::Straight, direction);
+		bullets_.push_back(bullet);
 	}
 }
 
 void Enemy::UpdateEntrance() {
-	
-
 
 	if (isFirstEnemy_) {
 		// 1体目の入場処理
@@ -107,11 +104,26 @@ void Enemy::UpdateEntrance() {
 	}
 
 	enemyWt_.UpdateMatrix();
-
 }
 
 // 敵の移動
 void Enemy::Move() {}
+
+void Enemy::FireRainBullet() {
+
+	Vector2 direction = {0.0f, -1.0f};
+
+	Vector3 bulletPosition = {-8.0f, 5.0f, 0.0f};
+
+	for (int i = 0; i < 10; i++) {
+
+		bulletPosition.x = -8.0f + 1.5f * i;
+
+		Bullet* bullet = new Bullet();
+		bullet->Initialize(target_, bulletPosition, bollModel_, camera_, player_, 0.08f, Bullet::MoveType::Straight, direction);
+		bullets_.push_back(bullet);
+	}
+}
 
 void Enemy::TakeDamage() { isDead_ = true; }
 
@@ -134,7 +146,7 @@ void Enemy::Update() {
 
 	attackTimer_ += 1.0f / 60.0f;
 
-	if (attackType_ == AttackType::Homing){
+	if (attackType_ == AttackType::Homing) {
 
 		int maxShots = isRapidFire_ ? 5 : maxShotCount_;
 
@@ -159,20 +171,21 @@ void Enemy::Update() {
 			}
 		}
 
-		
-
-		
-	
-	
 	} else if (attackType_ == AttackType::Fan) {
 		fanAttackTimer_ += 1.0f / 60.0f;
 		if (fanAttackTimer_ > 1.0f) {
 			FireFanBullet();
 			fanAttackTimer_ = 0.0f;
 		}
+	} else if (attackType_ == AttackType::Rain) {
+		rainAttackTimer_ += 1.0f / 60.0f;
+
+		if (!isRainFired_ && rainAttackTimer_ > 1.0f) {
+			FireRainBullet();
+			isRainFired_ = true;
+			rainAttackTimer_ = 0.0f;
+		}
 	}
-
-
 
 	for (Bullet* bullet : bullets_) {
 		bullet->Update();
@@ -191,8 +204,6 @@ void Enemy::Update() {
 	        }),
 	    bullets_.end());
 	enemyWt_.UpdateMatrix();
-
-
 }
 
 void Enemy::Draw() {
