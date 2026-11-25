@@ -1,3 +1,4 @@
+
 #include "Enemy.h"
 #include <Windows.h>
 #include <algorithm>
@@ -16,22 +17,27 @@ Enemy::~Enemy() {
 	bollModel_ = nullptr;
 }
 
-void Enemy::Initialize(KamataEngine::Model* enemyModel, KamataEngine::WorldTransform* target, KamataEngine::Camera* camera, player* player, KamataEngine::Vector3 position, bool isFirstEnemy) {
+void Enemy::Initialize(KamataEngine::Model* enemyModel, KamataEngine::Camera* camera, player* player, KamataEngine::Vector3 position, bool isFirstEnemy) {
+
 	player_ = player;
 	camera_ = camera;
-	target_ = target;
 	isFirstEnemy_ = isFirstEnemy;
+
 	// 敵
 	enemyModel_ = enemyModel;
 	enemyWt_.Initialize();
-	enemyWt_.translation_ = {position.x, position.y, position.z};
+	enemyWt_.translation_ = position;
+
 	// 方向処理
 	entranceDirection_.x = -position.x;
 	entranceDirection_.y = -position.y;
 
 	float length = sqrtf(entranceDirection_.x * entranceDirection_.x + entranceDirection_.y * entranceDirection_.y);
-	entranceDirection_.x /= length;
-	entranceDirection_.y /= length;
+
+	if (length > 0.0f) {
+		entranceDirection_.x /= length;
+		entranceDirection_.y /= length;
+	}
 
 	enemyWt_.scale_ = {0.5f, 0.5f, 0.5f};
 	enemyWt_.TransferMatrix();
@@ -41,24 +47,29 @@ void Enemy::Initialize(KamataEngine::Model* enemyModel, KamataEngine::WorldTrans
 }
 
 void Enemy::FireBullet() {
+
 	Bullet* bullet = new Bullet();
+
 	float bulletSpeed = isRapidFire_ ? 0.08f : 0.05f;
+
 	Vector3 bulletPosition = enemyWt_.translation_;
 
-	bullet->Initialize(target_, bulletPosition, bollModel_, camera_, player_, bulletSpeed, Bullet::MoveType::Homing, Vector2{0.0f, 0.0f});
+	bullet->Initialize(bulletPosition, bollModel_, camera_, player_, bulletSpeed, Bullet::MoveType::Homing, Vector2{0.0f, 0.0f});
 
 	bullets_.push_back(bullet);
 }
 
 void Enemy::FireFanBullet() {
 
-	float dx = target_->translation_.x - enemyWt_.translation_.x;
-	float dy = target_->translation_.y - enemyWt_.translation_.y;
+	Vector3 playerPosition = player_->GetPosition();
 
-	// 長さ求めてる
+	float dx = playerPosition.x - enemyWt_.translation_.x;
+	float dy = playerPosition.y - enemyWt_.translation_.y;
+
+	// 長さ
 	float length = std::sqrt(dx * dx + dy * dy);
 
-	if (length > 0) {
+	if (length > 0.0f) {
 		dx /= length;
 		dy /= length;
 	}
@@ -66,9 +77,11 @@ void Enemy::FireFanBullet() {
 	// 角度
 	float angle = std::atan2(dy, dx);
 
-	// 15℃
+	// 15度ずつ
 	for (int i = 0; i < 5; i++) {
+
 		float offset = (i - 2) * 15.0f * 3.14159265f / 180.0f;
+
 		float bulletAngle = angle + offset;
 
 		Vector2 direction;
@@ -76,8 +89,11 @@ void Enemy::FireFanBullet() {
 		direction.y = std::sin(bulletAngle);
 
 		Bullet* bullet = new Bullet();
+
 		Vector3 bulletPosition = enemyWt_.translation_;
-		bullet->Initialize(target_, bulletPosition, bollModel_, camera_, player_, 0.08f, Bullet::MoveType::Straight, direction);
+
+		bullet->Initialize(bulletPosition, bollModel_, camera_, player_, 0.08f, Bullet::MoveType::Straight, direction);
+
 		bullets_.push_back(bullet);
 	}
 }
@@ -85,13 +101,17 @@ void Enemy::FireFanBullet() {
 void Enemy::UpdateEntrance() {
 
 	if (isFirstEnemy_) {
+
 		// 1体目の入場処理
 		enemyWt_.translation_.x += speed_;
+
 		if (enemyWt_.translation_.x > -2.0f) {
 			speed_ = 0.0f;
 			isEntranceFinished_ = true;
 		}
+
 	} else {
+
 		// 2体目以降の入場処理
 		enemyWt_.translation_.x += entranceDirection_.x * speed_;
 		enemyWt_.translation_.y += entranceDirection_.y * speed_;
@@ -120,7 +140,9 @@ void Enemy::FireRainBullet() {
 		bulletPosition.x = -8.0f + 1.5f * i;
 
 		Bullet* bullet = new Bullet();
-		bullet->Initialize(target_, bulletPosition, bollModel_, camera_, player_, 0.08f, Bullet::MoveType::Straight, direction);
+
+		bullet->Initialize(bulletPosition, bollModel_, camera_, player_, 0.08f, Bullet::MoveType::Straight, direction);
+
 		bullets_.push_back(bullet);
 	}
 }
@@ -128,8 +150,10 @@ void Enemy::FireRainBullet() {
 void Enemy::TakeDamage() { isDead_ = true; }
 
 void Enemy::CheckCollision(PlayerBullet* playerBullet) {
+
 	KamataEngine::Vector3 enemyPosition = enemyWt_.translation_;
 	KamataEngine::Vector3 bulletPosition = playerBullet->GetPosition();
+
 	float diffX = enemyPosition.x - bulletPosition.x;
 	float diffY = enemyPosition.y - bulletPosition.y;
 	float diffZ = enemyPosition.z - bulletPosition.z;
@@ -142,6 +166,7 @@ void Enemy::CheckCollision(PlayerBullet* playerBullet) {
 }
 
 void Enemy::Update() {
+
 	Move();
 
 	attackTimer_ += 1.0f / 60.0f;
@@ -153,12 +178,15 @@ void Enemy::Update() {
 		float attackInterval = isRapidFire_ ? 0.1f : 0.3f;
 
 		if (isResting_) {
+
 			if (attackTimer_ >= 1.0f) {
 				isResting_ = false;
 				shotCount_ = 0;
 				attackTimer_ = 0.0f;
 			}
+
 		} else {
+
 			if (shotCount_ < maxShots && attackTimer_ >= attackInterval) {
 				FireBullet();
 				shotCount_++;
@@ -172,12 +200,16 @@ void Enemy::Update() {
 		}
 
 	} else if (attackType_ == AttackType::Fan) {
+
 		fanAttackTimer_ += 1.0f / 60.0f;
+
 		if (fanAttackTimer_ > 1.0f) {
 			FireFanBullet();
 			fanAttackTimer_ = 0.0f;
 		}
+
 	} else if (attackType_ == AttackType::Rain) {
+
 		rainAttackTimer_ += 1.0f / 60.0f;
 
 		if (!isRainFired_ && rainAttackTimer_ > 1.0f) {
@@ -189,7 +221,6 @@ void Enemy::Update() {
 
 	for (Bullet* bullet : bullets_) {
 		bullet->Update();
-		// bullet->IsHit();
 	}
 
 	bullets_.erase(
@@ -200,13 +231,16 @@ void Enemy::Update() {
 			        delete bullet;
 			        return true;
 		        }
+
 		        return false;
 	        }),
 	    bullets_.end());
+
 	enemyWt_.UpdateMatrix();
 }
 
 void Enemy::Draw() {
+
 	enemyModel_->Draw(enemyWt_, *camera_);
 
 	for (Bullet* bullet : bullets_) {

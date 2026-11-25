@@ -1,3 +1,4 @@
+
 #include "BackScreen.h"
 #include <cmath>
 #include <cstdlib>
@@ -5,20 +6,22 @@
 using namespace KamataEngine;
 
 BackScreen::BackScreen() {}
+
 BackScreen::~BackScreen() {}
 
 void BackScreen::Initialize(KamataEngine::Model* flourModel, KamataEngine::Camera* camera) {
-	camera_ = camera;
-	// assert(flourModel);
 
+	camera_ = camera;
 	flourModel_ = flourModel;
 
+	// ボール10個を初期化
 	for (int i = 0; i < 10; i++) {
 
 		balls_[i].flourWt_.Initialize();
+
 		balls_[i].flourWt_.scale_ = {2.0f, 2.0f, 2.0f};
 
-		// 画面内に収まるように配置
+		// 画面内にランダム配置
 		float x = static_cast<float>(rand() % 300 - 150) / 10.0f;
 		float y = static_cast<float>(rand() % 200 - 100) / 10.0f;
 		float z = 0.0f;
@@ -28,18 +31,22 @@ void BackScreen::Initialize(KamataEngine::Model* flourModel, KamataEngine::Camer
 		// 速度設定
 		balls_[i].velocity.x = static_cast<float>(rand() % 100 - 50) * 0.0005f;
 		balls_[i].velocity.y = static_cast<float>(rand() % 100 - 50) * 0.0005f;
+		balls_[i].velocity.z = 0.0f;
 
 		balls_[i].flourWt_.TransferMatrix();
+		balls_[i].flourWt_.UpdateMatrix();
 	}
 }
 
 void BackScreen::Update() {
+
 	for (int i = 0; i < 10; i++) {
+
+		// 移動
 		balls_[i].flourWt_.translation_.x += balls_[i].velocity.x;
 		balls_[i].flourWt_.translation_.y += balls_[i].velocity.y;
 
 		// 画面端で反転
-
 		if (std::abs(balls_[i].flourWt_.translation_.x) > 15.0f) {
 			balls_[i].velocity.x *= -1.0f;
 		}
@@ -47,12 +54,16 @@ void BackScreen::Update() {
 		if (std::abs(balls_[i].flourWt_.translation_.y) > 10.0f) {
 			balls_[i].velocity.y *= -1.0f;
 		}
+
+		// 行列更新
 		balls_[i].flourWt_.UpdateMatrix();
 		balls_[i].flourWt_.TransferMatrix();
 	}
 }
 
 void BackScreen::Draw() {
+
+	// 10個のボールを描画
 	for (int i = 0; i < 10; i++) {
 		flourModel_->Draw(balls_[i].flourWt_, *camera_);
 	}

@@ -3,17 +3,8 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
-#include <random>
 
 using namespace KamataEngine;
-
-std::random_device rd;
-std::mt19937 gen(rd());
-
-std::uniform_real_distribution<float> xDist(-15.0f, 15.0f);
-std::uniform_real_distribution<float> yDist(-10.0f, 10.0f);
-std::uniform_int_distribution<int> delayDist(0, 120);
-std::uniform_real_distribution<float> scaleDist(0.5f, 2.0f);
 
 changeScene::changeScene() {}
 
@@ -33,18 +24,19 @@ void changeScene::Initialize(KamataEngine::Model* squareModel, KamataEngine::Cam
 	landedCount_ = 0;
 
 	for (int i = 0; i < 100; i++) {
+
 		colorful[i].ballsWt_.Initialize();
 
 		// 丸ごとにサイズをランダムにする
-		float scale = scaleDist(gen);
+		float scale = scaleDist_(gen_);
 
 		colorful[i].ballsWt_.scale_ = {scale, scale, scale};
 
 		// 横の位置をランダムにする
-		colorful[i].ballsWt_.translation_.x = xDist(gen);
+		colorful[i].ballsWt_.translation_.x = xDist_(gen_);
 
 		// 最初の高さをバラバラにする
-		colorful[i].ballsWt_.translation_.y = 12.0f + yDist(gen);
+		colorful[i].ballsWt_.translation_.y = 12.0f + yDist_(gen_);
 
 		colorful[i].ballsWt_.translation_.z = 0.0f;
 
@@ -52,7 +44,7 @@ void changeScene::Initialize(KamataEngine::Model* squareModel, KamataEngine::Cam
 		colorful[i].velocity = {0.0f, -0.2f, 0.0f};
 
 		// 最初はランダムなタイミングで出現
-		colorful[i].delay = delayDist(gen);
+		colorful[i].delay = delayDist_(gen_);
 
 		colorful[i].active = false;
 		colorful[i].landed = false;
@@ -64,6 +56,7 @@ void changeScene::Initialize(KamataEngine::Model* squareModel, KamataEngine::Cam
 }
 
 bool changeScene::IsCollision(int indexA, int indexB) {
+
 	const auto& a = colorful[indexA];
 	const auto& b = colorful[indexB];
 
@@ -86,20 +79,19 @@ bool changeScene::IsCollision(int indexA, int indexB) {
 
 void changeScene::Update() {
 
-	 if (!isStart_ || isAnimEnd_) {
+	if (!isStart_ || isAnimEnd_) {
 		return;
-	 }
+	}
 
 	frame_++;
 
 	// 演出時間が終わったら終了
-	// 丸を着地させず、降っている途中で終了する
 	if (frame_ >= kMaxAnimationFrames) {
 		isAnimEnd_ = true;
 		return;
 	}
 
-	// ① 丸を降らせ続ける
+	// 丸を降らせ続ける
 	for (int i = 0; i < 100; i++) {
 
 		// 出現タイミングになったら動かす
@@ -118,10 +110,10 @@ void changeScene::Update() {
 		if (colorful[i].ballsWt_.translation_.y < -12.0f) {
 
 			// 上のほうへ戻す
-			colorful[i].ballsWt_.translation_.y = 12.0f + yDist(gen);
+			colorful[i].ballsWt_.translation_.y = 12.0f + yDist_(gen_);
 
 			// 横の位置も変える
-			colorful[i].ballsWt_.translation_.x = xDist(gen);
+			colorful[i].ballsWt_.translation_.x = xDist_(gen_);
 		}
 
 		// 行列を更新
@@ -129,7 +121,7 @@ void changeScene::Update() {
 		colorful[i].ballsWt_.UpdateMatrix();
 	}
 
-	// ② 丸同士の当たり判定
+	// 丸同士の当たり判定
 	for (int i = 0; i < 100; i++) {
 
 		if (!colorful[i].active) {

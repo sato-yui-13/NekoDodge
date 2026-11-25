@@ -137,10 +137,38 @@ void player::UpdateEntrance() {
 //}
 #pragma endregion
 
-void player::TakeDamage() { hp_--; }
+void player::TakeDamage() {
+	hp_--;
+	damageTimer_ = 1.0f;
+	blinkTimer_ = 0.0f;
+	isVisible_ = true;
+}
 bool player::IsDead() { return hp_ <= 0; }
 void player::SetTargetPosition(KamataEngine::Vector3 position) { targetPosition_ = position; }
 void player::Update() {
+	// 被弾時の点滅
+	if (damageTimer_ > 0.0f) {
+
+		damageTimer_ -= 1.0f / 60.0f;
+		blinkTimer_ += 1.0f / 60.0f;
+
+		if (blinkTimer_ >= 0.1f) {
+			blinkTimer_ = 0.0f;
+			isVisible_ = !isVisible_;
+		}
+
+		if (damageTimer_ <= 0.0f) {
+			damageTimer_ = 0.0f;
+			isVisible_ = true;
+		}
+
+	} else {
+		isVisible_ = true;
+	}
+
+
+
+
 
 	if (isEntrance_) {
 		// 入場
@@ -162,8 +190,12 @@ void player::Update() {
 
 void player::Draw() {
 
-	playerModel_->Draw(playerWt_, *camera_);
+	if (isVisible_) {
+		playerModel_->Draw(playerWt_, *camera_);
+	}
+
 	for (int i = 0; i < playerBullets_.size(); i++) {
 		playerBullets_[i]->Draw();
 	}
+
 }

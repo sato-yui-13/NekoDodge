@@ -1,46 +1,49 @@
+
 #include "Bullet.h"
 #include "player.h"
 #include <Windows.h>
 #include <cmath>
 #include <string>
+
 using namespace KamataEngine;
 
 Bullet::~Bullet() {}
 
 void Bullet::Initialize(
-    KamataEngine::WorldTransform* target, KamataEngine::Vector3 position, KamataEngine::Model* ballModel, KamataEngine::Camera* camera, player* player, float speed_, Bullet::MoveType moveType,
-    KamataEngine::Vector2 direction) {
+    KamataEngine::Vector3 position, KamataEngine::Model* ballModel, KamataEngine::Camera* camera, player* player, float speed_, Bullet::MoveType moveType, KamataEngine::Vector2 direction) {
+
 	player_ = player;
-	target_ = target;
 	camera_ = camera;
 	ballModel_ = ballModel;
 
 	direction_ = direction;
 	moveType_ = moveType;
+
 	bulletWt_.Initialize();
 	bulletWt_.translation_ = position;
 	bulletWt_.scale_ = {0.5f, 0.5f, 0.5f};
 	bulletWt_.TransferMatrix();
 	bulletWt_.UpdateMatrix();
+
 	speed = speed_;
 }
+
 
 void Bullet::Homing() {
 
 	waveTime_ += 1.0f / 60.0f;
 
-	// 位置取得
-	targetPosition_.x = target_->translation_.x;
-	targetPosition_.y = target_->translation_.y;
+	// プレイヤーの位置を取得
+	KamataEngine::Vector3 targetPosition = player_->GetPosition();
 
 	// プレイヤーと弾の方向
-	velocity_.x = targetPosition_.x - bulletWt_.translation_.x;
-	velocity_.y = targetPosition_.y - bulletWt_.translation_.y;
+	velocity_.x = targetPosition.x - bulletWt_.translation_.x;
+	velocity_.y = targetPosition.y - bulletWt_.translation_.y;
 
-	// 長さ求めてる
+	// 長さを求める
 	float length = std::sqrt(velocity_.x * velocity_.x + velocity_.y * velocity_.y);
 
-	if (length > 0) {
+	if (length > 0.0f) {
 		velocity_.x /= length;
 		velocity_.y /= length;
 	}
@@ -50,10 +53,11 @@ void Bullet::Homing() {
 
 	float wave = std::sin(waveTime_ * 3.0f) * 0.15f;
 
-	// 更新
+	// 移動
 	bulletWt_.translation_.x += speed * (velocity_.x + sideX * wave);
 	bulletWt_.translation_.y += speed * (velocity_.y + sideY * wave);
 }
+
 
 void Bullet::SetPosition(KamataEngine::Vector3 position) {
 	bulletWt_.translation_ = position;
@@ -61,15 +65,23 @@ void Bullet::SetPosition(KamataEngine::Vector3 position) {
 }
 
 void Bullet::StraightMove() {
-	// 直線
+
+	// 直線移動
 	bulletWt_.translation_.x += direction_.x * speed;
 	bulletWt_.translation_.y += direction_.y * speed;
 }
 
 bool Bullet::CheckCollision() {
 
-	float dx = bulletWt_.translation_.x - target_->translation_.x;
-	float dy = bulletWt_.translation_.y - target_->translation_.y;
+	if (player_ == nullptr) {
+		return false;
+	}
+
+	// プレイヤーの位置を取得
+	KamataEngine::Vector3 playerPosition = player_->GetPosition();
+
+	float dx = bulletWt_.translation_.x - playerPosition.x;
+	float dy = bulletWt_.translation_.y - playerPosition.y;
 
 	float distance = std::sqrt(dx * dx + dy * dy);
 
@@ -85,9 +97,9 @@ void Bullet::Update() {
 	if (moveType_ == MoveType::Homing) {
 		// 追尾処理
 		Homing();
+
 	} else if (moveType_ == MoveType::Straight) {
 		// 直線移動処理
-
 		StraightMove();
 	}
 

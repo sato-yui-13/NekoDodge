@@ -1,3 +1,4 @@
+
 #include "GameScene.h"
 #include <algorithm>
 #include <cfloat>
@@ -6,9 +7,7 @@
 using namespace KamataEngine;
 
 GameScene::GameScene() {
-	// ポインタの安全な初期化
 	camera_ = nullptr;
-	// enemy_ = nullptr;
 	enemyModel_ = nullptr;
 	backgroundModel_ = nullptr;
 	particleModel_ = nullptr;
@@ -20,10 +19,15 @@ GameScene::~GameScene() {
 	}
 	enemies_.clear();
 
+	delete player_;
+	player_ = nullptr;
+
+	delete playerModel_;
+	playerModel_ = nullptr;
+
 	delete enemyModel_;
 	enemyModel_ = nullptr;
 
-	// ★追加：カメラの解放
 	delete camera_;
 	camera_ = nullptr;
 
@@ -37,36 +41,33 @@ GameScene::~GameScene() {
 
 	delete particleModel_;
 	particleModel_ = nullptr;
-
-	// delete bulletModel_;
-	// bulletModel_ = nullptr;
 }
 
 void GameScene::Initialize() {
-	//============= 背景 ============
+
+	// 背景
 	backgroundModel_ = Model::CreateFromOBJ("titleScreen", true);
 	backgroundTransform_.Initialize();
 	backgroundTransform_.UpdateMatrix();
 
-	//========== カメラ =============
+	// カメラ
 	camera_ = new Camera();
 	camera_->Initialize();
 	camera_->translation_ = {0.0f, 0.0f, -10.0f};
 	camera_->rotation_ = {0.0f, 0.0f, 0.0f};
 	camera_->UpdateMatrix();
 
-	//========= player ===========
+	// プレイヤー
 	playerModel_ = Model::CreateFromOBJ("player", true);
 	player_ = new player();
 	player_->Initialize(playerModel_, camera_);
-	target_ = player_->GetWorldTransform();
-	//======== 敵 ============
+
+	// 敵
 	enemyModel_ = Model::CreateFromOBJ("flour", true);
 	enemiesPerWave_ = 1;
 	CreateEnemy();
 
-	//=============== パーティクル ================
-	//	particles_ = new Particle();
+	// パーティクル
 	particleModel_ = Model::CreateFromOBJ("boll", true);
 }
 
@@ -75,17 +76,18 @@ bool GameScene::IsPlayerDead() const { return isPlayerDead_; }
 bool GameScene::IsExplosionFinished() const { return isPlayerDead_ && particles_.empty(); }
 
 void GameScene::CreateEnemy() {
+
 	// 8方向
 	Vector3 spawnPositions[8] = {
-	    {-5.0f,  5.0f,  0.0f}, // 左
-	    {10.0f,  0.0f,  0.0f}, // 右
-	    {0.0f,   5.0f,  0.0f}, // 上
-	    {0.0f,   -1.0f, 0.0f}, // 下
-	    {-5.0f, 1.0f,  0.0f}, // 左上
-	    {5.0f,  1.0f,  0.0f}, // 右上
-	    {-5.0f, -1.0f, 0.0f}, // 左下
-	    {5.0f,  -1.0f, 0.0f}  // 右下
-	};
+	    {-5.0f, 5.0f,  0.0f},
+        {10.0f, 0.0f,  0.0f},
+        {0.0f,  5.0f,  0.0f},
+        {0.0f,  -1.0f, 0.0f},
+        {-5.0f, 1.0f,  0.0f},
+        {5.0f,  1.0f,  0.0f},
+        {-5.0f, -1.0f, 0.0f},
+        {5.0f,  -1.0f, 0.0f}
+    };
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -96,36 +98,32 @@ void GameScene::CreateEnemy() {
 		int randomIndex = dist(gen);
 
 		Enemy* enemy = new Enemy();
-		Vector3 position;
-		if (enemySpawnCount_ == 0) {
 
+		Vector3 position;
+
+		if (enemySpawnCount_ == 0) {
 			position = {-14.0f, 0.0f, 0.0f};
 		} else {
 			position = spawnPositions[randomIndex];
 		}
 
-		enemy->Initialize(enemyModel_, target_, camera_, player_, position, enemySpawnCount_ == 0);
+		enemy->Initialize(enemyModel_, camera_, player_, position, enemySpawnCount_ == 0);
 
 		if (enemySpawnCount_ == 0) {
-
 			enemy->SetMaxShotCount(1);
 
 		} else if (enemySpawnCount_ == 1) {
-
 			enemy->SetMaxShotCount(3);
 
 		} else if (enemySpawnCount_ == 2) {
-
 			enemy->SetRapidFire(true);
 
 		} else if (enemySpawnCount_ == 3) {
-
 			enemy->SetAttackType(Enemy::AttackType::Fan);
-		} else if (enemySpawnCount_ == 4) {
 
+		} else if (enemySpawnCount_ == 4) {
 			enemy->SetAttackType(Enemy::AttackType::Rain);
 		}
-
 
 		enemySpawnCount_++;
 
@@ -134,10 +132,13 @@ void GameScene::CreateEnemy() {
 }
 
 void GameScene::Update() {
+
 	gameTimer_ += 1.0f / 60.0f;
+
 	float minDistance = FLT_MAX;
 	Enemy* nearestEnemy = nullptr;
 
+	// パーティクル更新
 	for (Particle* particle : particles_) {
 		particle->Update();
 	}
@@ -154,14 +155,13 @@ void GameScene::Update() {
 	        }),
 	    particles_.end());
 
-	// player_->Update();
-
-	// 死んだか
+	// プレイヤー死亡判定
 	if (player_->IsDead() && !isPlayerDead_) {
-		isPlayerDead_ = true;
-		Vector3 position = player_->GetWorldTransform()->translation_;
 
-		// 分散
+		isPlayerDead_ = true;
+
+		Vector3 position = player_->GetPosition();
+
 		Vector3 velocities[8] = {
 		    {0.01f,  0.01f,  0.0f},
             {0.0f,   0.01f,  0.0f},
@@ -180,53 +180,59 @@ void GameScene::Update() {
 		}
 	}
 
+	// 敵の入場開始
 	if (!player_->IsEntrance() && !isEnemyEntranceStarted_) {
-		// 敵の入場開始処理
 		isEnemyEntranceStarted_ = true;
 	}
 
+	// 敵更新
 	for (Enemy* enemy : enemies_) {
+
 		if (isEnemyEntranceStarted_) {
+
 			if (!enemy->IsEntranceFinished()) {
 				enemy->UpdateEntrance();
 			} else {
 				enemy->Update();
 			}
 		}
-		// ここで1体ずつ処理する
 	}
 
 	// 当たり判定
 	for (Enemy* enemy : enemies_) {
+
 		if (enemy->IsDead()) {
 			continue;
 		}
 
 		for (PlayerBullet* bullet : player_->GetPlayerBullets()) {
+
 			enemy->CheckCollision(bullet);
 
 			if (enemy->IsDead()) {
 				break;
 			}
 		}
-	} // ← ここで当たり判定ループ終了！
+	}
 
 	// 敵の削除・次の敵の生成
 	if (!enemies_.empty() && enemies_[0]->IsDead()) {
+
 		delete enemies_[0];
 		enemies_.erase(enemies_.begin());
+
 		CreateEnemy();
 	}
 
+	// 一番近い敵を探す
 	for (Enemy* enemy : enemies_) {
-		// 敵との距離を調べる
 
 		if (enemy->IsDead()) {
 			continue;
 		}
 
-		Vector3 playerPosition = player_->GetWorldTransform()->translation_;
-		Vector3 enemyPosition = enemy->GetWorldTransform()->translation_;
+		Vector3 playerPosition = player_->GetPosition();
+		Vector3 enemyPosition = enemy->GetPosition();
 
 		float dx = enemyPosition.x - playerPosition.x;
 		float dy = enemyPosition.y - playerPosition.y;
@@ -238,21 +244,25 @@ void GameScene::Update() {
 			nearestEnemy = enemy;
 		}
 	}
-	if (nearestEnemy != nullptr) {
 
-		player_->SetTargetPosition(nearestEnemy->GetWorldTransform()->translation_);
+	// 攻撃対象を設定
+	if (nearestEnemy != nullptr) {
+		player_->SetTargetPosition(nearestEnemy->GetPosition());
 	}
-	// ここ！
+
 	player_->Update();
 }
 
 void GameScene::Draw() {
+
 	Model::PreDraw();
 
 	backgroundModel_->Draw(backgroundTransform_, *camera_);
+
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
+
 	if (!isPlayerDead_) {
 		player_->Draw();
 	}

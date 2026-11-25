@@ -1,3 +1,4 @@
+
 #pragma once
 #include "KamataEngine.h"
 #include "math/Matrix4x4.h"
@@ -6,41 +7,36 @@
 #include "PlayerBullet.h"
 #include <vector>
 
-
 class player {
 public:
-	// player();
 	~player();
 
 	void Initialize(KamataEngine::Model* playerModel, KamataEngine::Camera* camera);
 
-	//キー入力
+	// キー入力
 	void InputMove();
-	//攻撃
+
+	// 攻撃
 	void Attack();
 
-
-	//入場
+	// 入場
 	void UpdateEntrance();
-
 	bool IsEntrance() { return isEntrance_; }
-	
-	//最初の操作　ゲームスタート前 操作確認
-	//void CheckTutorialInput();
 
-	//hp
+	// HP
 	void TakeDamage();
 	bool IsDead();
 
 	void Update();
-
 	void Draw();
 
-	std::vector<PlayerBullet*>& GetPlayerBullets() { return playerBullets_; }
+	// 弾の取得（読み取り専用）
+	const std::vector<PlayerBullet*>& GetPlayerBullets() const { return playerBullets_; }
 
-	//現在位置の共有
-	KamataEngine::WorldTransform* GetWorldTransform() { return &playerWt_; }
-	//狙うやつ
+	// 現在位置の取得（読み取り専用）
+	KamataEngine::Vector3 GetPosition() const { return playerWt_.translation_; }
+
+	// 狙うやつ
 	void SetTargetPosition(KamataEngine::Vector3 position);
 
 private:
@@ -54,41 +50,34 @@ private:
 	// 速度
 	KamataEngine::Vector2 velocity_ = {0.1f, 0.1f};
 
-	//向き 上向きスタート
+	// 向き
 	KamataEngine::Vector2 direction_ = {0.0f, 1.0f};
 
-	
-	//========== 入場 ============
-	//入場中か　これですたーとする
+	// 入場
 	bool isEntrance_ = false;
-	//最初の位置
-	KamataEngine::Vector2 entranceStart_ = {-10.0f, -7.0f,};
-	////最後の位置
+	KamataEngine::Vector2 entranceStart_ = {-10.0f, -7.0f};
 	KamataEngine::Vector2 entranceEnd_ = {0.0f, 0.0f};
-	//startタイマー
 	float entranceTimer_ = 0.0f;
-	//経過時間
 	float entranceDuration_ = 1.0f;
 
-	//======== チュートリアル(操作) ===========
-	//チュートリアルフラグ
+	// チュートリアル
 	bool isTutorial = false;
-	//入力操作の確認フラグ
-	//bool isMoveW_ = false;
-	//bool isMoveA_ = false;
-	//bool isMoveS_ = false;
-	//bool isMoveD_ = false;
 
-	//================= hp =================
-	
+	// HP
 	int hp_ = 6;
 
-	//============== ボール =============
+	// プレイヤー弾
 	std::vector<PlayerBullet*> playerBullets_;
 	KamataEngine::Model* playerBulletModel_ = nullptr;
 
-
-	//狙うやつ
+	// 狙うやつ
 	KamataEngine::Vector3 targetPosition_ = {0.0f, 0.0f, 0.0f};
 
+	// 無敵時間
+	float invincibleTimer_ = 0.0f;
+
+	// 被弾点滅
+	float damageTimer_ = 0.0f;
+	float blinkTimer_ = 0.0f;
+	bool isVisible_ = true;
 };
